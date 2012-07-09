@@ -18,7 +18,7 @@
 # javascriptlint
 #
 JSL_EXEC	?= deps/javascriptlint/build/install/jsl
-JSL		?= python2.6 $(JSL_EXEC)
+JSL		?= python $(JSL_EXEC)
 
 $(JSL_EXEC): | deps/javascriptlint/.git
 	cd deps/javascriptlint && make install
@@ -35,5 +35,5 @@ $(JSSTYLE_EXEC): | deps/jsstyle/.git
 # restdown
 #
 RESTDOWN_EXEC	?= deps/restdown/bin/restdown
-RESTDOWN	?= python2.6 $(RESTDOWN_EXEC)
+RESTDOWN	?= python $(RESTDOWN_EXEC)
 $(RESTDOWN_EXEC): | deps/restdown/.git
