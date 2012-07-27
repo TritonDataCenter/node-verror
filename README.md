@@ -1,44 +1,105 @@
 # verror: richer JavaScript errors
 
-This module provides VError, which is like JavaScript's built-in Error class,
-but supports a "cause" argument and a printf-style message.  The cause argument
-can be null.  For example:
-
-    if (err)
-        throw (new VError(err, 'operation "%s" failed', opname));
-
-If err.message is "file not found" and "opname" is "rm", then the thrown
-exception's toString() would return:
-
-       operation "rm" failed: file not found
-
-This is useful for annotating exceptions up the stack, rather than getting an
-extremely low-level error (like "file not found") for a potentially much higher
-level operation.
-
-Additionally, when printed using node-extsprintf using %r, each exception's
-stack is printed.
+This module provides two classes: VError, for accretive errors, and WError, for
+wrapping errors.  These are best demonstrated by example.
 
 
-# Example
+## VError for accretive error messages
 
-First, install it:
+At the most basic level, VError is just like JavaScript's Error class, but with
+printf-style arguments:
 
-    # npm install verror
+    var verror = require('verror');
 
-Now, use it:
+    var opname = 'read';
+    var err = new verror.VError('"%s" operation failed', opname);
+    console.log(err.message);
+    console.log(err.stack);
 
-    var mod_fs = require('fs');
-    var mod_extsprintf = require('extsprintf');
-    var mod_verror = require('../lib/verror');
-    
-    mod_fs.stat('/nonexistent', function (err) {
-    	console.log(mod_extsprintf.sprintf('%r',
-    	    new mod_verror.VError(err, 'operation failed')));
+This prints:
+
+    "read" operation failed
+    "read" operation failed
+        at Object.<anonymous> (/Users/dap/work/node-verror/examples/varargs.js:4:11)
+        at Module._compile (module.js:449:26)
+        at Object.Module._extensions..js (module.js:467:10)
+        at Module.load (module.js:356:32)
+        at Function.Module._load (module.js:312:12)
+        at Module.runMain (module.js:492:10)
+        at process.startup.processNextTick.process._tickCallback (node.js:244:9)
+
+More interestingly, you can use VError to build up an error describing what
+happened at various levels in the stack.  For example, suppose you have a
+request handler that stats a file and fails if it doesn't exist:
+
+    var fs = require('fs');
+    var verror = require('verror');
+
+    function checkFile(filename, callback) {
+        fs.stat(filename, function (err) {
+            if (err)
+		/* Annotate the "stat" error with what we were doing. */
+	    	return (callback(new verror.VError(err,
+		    'failed to check "%s"', filename)));
+
+	    /* ... */
+        });
+    }
+
+    function handleRequest(filename, callback) {
+    	checkFile('/nonexistent', function (err) {
+    	    if (err) {
+    	    	/* Annotate the "checkFile" error with what we were doing. */
+    	    	return (callback(new verror.VError(err, 'request failed')));
+    	    }
+
+    	    /* ... */
+    	});
+    }
+
+    handleRequest('/nonexistent', function (err) {
+	if (err)
+		console.log(err.message);
+	/* ... */
     });
 
-outputs:
+Since the file "/nonexistent" doesn't exist, this prints out:
 
-    EXCEPTION: VError: operation failed: ENOENT, no such file or directory '/nonexistent'
-        at Object.oncomplete (/home/dap/node-verror/examples/simple.js:7:6)
-    Caused by: EXCEPTION: Error: Error: ENOENT, no such file or directory '/nonexistent'
+    request failed: failed to check "/nonexistent": ENOENT, stat '/nonexistent'
+
+The idea is that the lowest level (Node's "fs.stat" function) generates an
+arbitrary error, and each higher level (request handler and stat callback)
+creates a new VError that annotates the previous error with what it was doing,
+so that the result is a clear message explaining what failed at each level.
+
+This plays nicely with extsprintf's "%r" specifier, which prints out a
+Java-style stacktrace with the whole chain of exceptions:
+
+    EXCEPTION: VError: request failed: failed to check "/nonexistent": ENOENT, stat '/nonexistent'
+        at /Users/dap/work/node-verror/examples/levels.js:21:21
+        at /Users/dap/work/node-verror/examples/levels.js:9:12
+        at Object.oncomplete (fs.js:297:15)
+    Caused by: EXCEPTION: VError: failed to check "/nonexistent": ENOENT, stat '/nonexistent'
+        at /Users/dap/work/node-verror/examples/levels.js:9:21
+        at Object.oncomplete (fs.js:297:15)
+    Caused by: EXCEPTION: Error: Error: ENOENT, stat '/nonexistent'
+
+## WError for wrapped errors
+
+Sometimes you don't want an Error's "message" field to include the details of
+all of the low-level errors, but you still want to be able to get at them
+programmatically.  For example, in an HTTP server, you probably don't want to
+spew all of the low-level errors back to the client, but you do want to include
+them in the audit log entry for the request.  In that case, you can use a
+WError, which is created exactly like VError (and supports both printf-style
+arguments and an optional cause), but the resulting "message" only contains the
+top-level error.  Using the same example above, but replacing the VError in
+handleRequest with WError, we get this output:
+
+    request failed
+
+That's what we wanted -- just a high-level summary for the client.  But we can
+get the object's toString() for the full details:
+
+    WError: request failed; caused by failed to check "/nonexistent": ENOENT,
+    stat '/nonexistent'
