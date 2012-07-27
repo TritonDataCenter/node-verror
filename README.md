@@ -103,3 +103,14 @@ get the object's toString() for the full details:
 
     WError: request failed; caused by failed to check "/nonexistent": ENOENT,
     stat '/nonexistent'
+
+# Contributing
+
+Contributions welcome.  Code should be "make check" clean.  To run "make check",
+you'll need these tools:
+
+* https://github.com/davepacheco/jsstyle
+* https://github.com/davepacheco/javascriptlint
+
+If you're changing something non-trivial or user-facing, you may want to submit
+an issue first.

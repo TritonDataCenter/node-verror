@@ -19,5 +19,4 @@ JSL_CONF_NODE	 = jsl.node.conf
 # Default target is "check"
 check:
 
-include ./Makefile.deps
 include ./Makefile.targ
