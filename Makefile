@@ -9,14 +9,25 @@
 #
 
 #
+# Tools
+#
+NPM		 = npm
+
+#
 # Files
 #
-JS_FILES	:= $(shell find lib examples -name '*.js')
+JS_FILES	:= $(shell find lib examples tests -name '*.js')
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSL_CONF_NODE	 = jsl.node.conf
 
-# Default target is "check"
-check:
+.PHONY: all
+all:
+	$(NPM) install
+
+.PHONY: test
+test:
+	node tests/tst.verror.js
+	@echo all tests passed
 
 include ./Makefile.targ
