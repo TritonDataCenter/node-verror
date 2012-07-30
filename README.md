@@ -84,6 +84,7 @@ Java-style stacktrace with the whole chain of exceptions:
         at Object.oncomplete (fs.js:297:15)
     Caused by: EXCEPTION: Error: Error: ENOENT, stat '/nonexistent'
 
+
 ## WError for wrapped errors
 
 Sometimes you don't want an Error's "message" field to include the details of
@@ -103,6 +104,17 @@ get the object's toString() for the full details:
 
     WError: request failed; caused by failed to check "/nonexistent": ENOENT,
     stat '/nonexistent'
+
+and as usual, the "stack" member shows the stack trace:
+
+    WError: failed to handle request; caused by WError: failed to stat "/nonexistent"; caused by Error: ENOENT, stat '/nonexistent'
+        at /Users/dap/work/node-verror/examples/werror.js:10:13
+        at Object.oncomplete (fs.js:297:15)
+    Caused by: WError: failed to stat "/nonexistent"; caused by Error: ENOENT, stat '/nonexistent'
+        at /Users/dap/work/node-verror/examples/werror.js:7:20
+        at Object.oncomplete (fs.js:297:15)
+    Caused by: Error: ENOENT, stat '/nonexistent'
+
 
 # Contributing
 

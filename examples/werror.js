@@ -4,9 +4,10 @@ var mod_verror = require('../lib/verror');
 var filename = '/nonexistent';
 
 mod_fs.stat(filename, function (err1) {
-        var err2 = new mod_verror.VError(err1, 'failed to stat "%s"', filename);
+        var err2 = new mod_verror.WError(err1, 'failed to stat "%s"', filename);
 	
 	/* The following would normally be higher up the stack. */
-	var err3 = new mod_verror.VError(err2, 'failed to handle request');
+	var err3 = new mod_verror.WError(err2, 'failed to handle request');
 	console.log(err3.message);
+	console.log(err3.stack);
 });
