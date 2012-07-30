@@ -1,10 +1,9 @@
 # verror: richer JavaScript errors
 
 This module provides two classes: VError, for accretive errors, and WError, for
-wrapping errors.  These are best demonstrated by example.
+wrapping errors.  Both support printf-style error messages using extsprintf.
 
-
-## VError for accretive error messages
+## Printf-style errors
 
 At the most basic level, VError is just like JavaScript's Error class, but with
 printf-style arguments:
@@ -20,13 +19,16 @@ This prints:
 
     "read" operation failed
     "read" operation failed
-        at Object.<anonymous> (/Users/dap/work/node-verror/examples/varargs.js:4:11)
+        at Object.<anonymous> (/Users/dap/node-verror/examples/varargs.js:4:11)
         at Module._compile (module.js:449:26)
         at Object.Module._extensions..js (module.js:467:10)
         at Module.load (module.js:356:32)
         at Function.Module._load (module.js:312:12)
         at Module.runMain (module.js:492:10)
         at process.startup.processNextTick.process._tickCallback (node.js:244:9)
+
+
+## VError for accretive error messages
 
 More interestingly, you can use VError to build up an error describing what
 happened at various levels in the stack.  For example, suppose you have a
@@ -67,7 +69,7 @@ Since the file "/nonexistent" doesn't exist, this prints out:
 
     request failed: failed to check "/nonexistent": ENOENT, stat '/nonexistent'
 
-The idea is that the lowest level (Node's "fs.stat" function) generates an
+The idea here is that the lowest level (Node's "fs.stat" function) generates an
 arbitrary error, and each higher level (request handler and stat callback)
 creates a new VError that annotates the previous error with what it was doing,
 so that the result is a clear message explaining what failed at each level.
@@ -92,10 +94,10 @@ all of the low-level errors, but you still want to be able to get at them
 programmatically.  For example, in an HTTP server, you probably don't want to
 spew all of the low-level errors back to the client, but you do want to include
 them in the audit log entry for the request.  In that case, you can use a
-WError, which is created exactly like VError (and supports both printf-style
-arguments and an optional cause), but the resulting "message" only contains the
-top-level error.  Using the same example above, but replacing the VError in
-handleRequest with WError, we get this output:
+WError, which is created exactly like VError (and also supports both
+printf-style arguments and an optional cause), but the resulting "message" only
+contains the top-level error.  Using the same example above, but replacing the
+VError in handleRequest with WError, we get this output:
 
     request failed
 
