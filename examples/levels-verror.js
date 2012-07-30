@@ -10,20 +10,19 @@ function checkFile(filename, callback) {
 			    'failed to check "%s"', filename)));
 
 		/* ... */
-		callback();
+		return (callback());
 	});
 }
 
 function handleRequest(filename, callback) {
 	checkFile('/nonexistent', function (err) {
-		if (err) {
+		if (err)
 			/* Annotate the "checkFile" error. */
 			return (callback(new verror.VError(
 			    err, 'request failed')));
-		}
 
 		/* ... */
-		callback();
+		return (callback());
 	});
 }
 

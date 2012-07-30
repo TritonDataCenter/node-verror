@@ -11,7 +11,7 @@
 #
 # Files
 #
-JS_FILES	:= $(shell find lib -name '*.js')
+JS_FILES	:= $(shell find lib examples -name '*.js')
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSL_CONF_NODE	 = jsl.node.conf
