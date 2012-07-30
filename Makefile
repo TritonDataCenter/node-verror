@@ -28,6 +28,7 @@ all:
 .PHONY: test
 test:
 	node tests/tst.verror.js
+	node tests/tst.werror.js
 	@echo all tests passed
 
 include ./Makefile.targ
