@@ -9,5 +9,6 @@ mod_fs.stat(filename, function (err1) {
 	/* The following would normally be higher up the stack. */
 	var err3 = new mod_verror.WError(err2, 'failed to handle request');
 	console.log(err3.message);
+	console.log(err3.toString());
 	console.log(err3.stack);
 });

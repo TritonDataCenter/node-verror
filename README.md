@@ -96,27 +96,17 @@ spew all of the low-level errors back to the client, but you do want to include
 them in the audit log entry for the request.  In that case, you can use a
 WError, which is created exactly like VError (and also supports both
 printf-style arguments and an optional cause), but the resulting "message" only
-contains the top-level error.  Using the same example above, but replacing the
-VError in handleRequest with WError, we get this output:
+contains the top-level error.  It's also more verbose, including the class
+associated with each error in the cause chain.  Using the same example above,
+but replacing the VError in handleRequest with WError, we get this output:
 
     request failed
 
 That's what we wanted -- just a high-level summary for the client.  But we can
 get the object's toString() for the full details:
 
-    WError: request failed; caused by failed to check "/nonexistent": ENOENT,
-    stat '/nonexistent'
-
-and as usual, the "stack" member shows the stack trace:
-
-    WError: failed to handle request; caused by WError: failed to stat "/nonexistent"; caused by Error: ENOENT, stat '/nonexistent'
-        at /Users/dap/work/node-verror/examples/werror.js:10:13
-        at Object.oncomplete (fs.js:297:15)
-    Caused by: WError: failed to stat "/nonexistent"; caused by Error: ENOENT, stat '/nonexistent'
-        at /Users/dap/work/node-verror/examples/werror.js:7:20
-        at Object.oncomplete (fs.js:297:15)
-    Caused by: Error: ENOENT, stat '/nonexistent'
-
+    WError: request failed; caused by WError: failed to check "/nonexistent";
+    caused by Error: ENOENT, stat '/nonexistent'
 
 # Contributing
 
