@@ -36,7 +36,7 @@ mod_assert.equal(err.message, '');
 mod_assert.ok(err.cause() === undefined);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    '',
+    'VError',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -51,7 +51,7 @@ mod_assert.equal(err.message, 'my error');
 mod_assert.ok(err.cause() === undefined);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'my error',
+    'VError: my error',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -84,7 +84,7 @@ mod_assert.equal(err.message, 'proximate cause: 3 issues: root cause');
 mod_assert.ok(err.cause() === suberr);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'proximate cause: 3 issues: root cause',
+    'VError: proximate cause: 3 issues: root cause',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -93,7 +93,7 @@ mod_assert.equal(err.message, 'proximate cause: 3 issues: root cause');
 mod_assert.ok(err.cause() === suberr);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'proximate cause: 3 issues: root cause',
+    'VError: proximate cause: 3 issues: root cause',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -119,7 +119,7 @@ mod_assert.equal(err.message, 'my error');
 mod_assert.ok(err.cause() === undefined);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'my error',
+    'VError: my error',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -132,7 +132,7 @@ mod_assert.equal(err.message, '');
 mod_assert.ok(err.cause() === undefined);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    '',
+    'VError',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -143,7 +143,7 @@ function makeErr(options) {
 err = makeErr({});
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'test error',
+    'VError: test error',
     '    at makeErr (tst.verror.js)',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
@@ -151,6 +151,6 @@ mod_assert.equal(stack, [
 err = makeErr({ 'constructorOpt': makeErr });
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'test error',
+    'VError: test error',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
