@@ -86,3 +86,15 @@ mod_util.inherits(WErrorChildAnon, WError);
 WErrorChildAnon.prototype.name = 'WErrorChildAnon';
 err = new WErrorChildAnon('top');
 mod_assert.equal(err.toString(), 'WErrorChildAnon: top');
+
+
+// Test get appropriate exception name in `.toString()` when reconstituting
+// an error instance a la:
+//    https://github.com/mcavage/node-fast/blob/master/lib/client.js#L215
+err = new VError('top');
+err.name = 'CustomNameError';
+mod_assert.equal(err.toString(), 'CustomNameError: top');
+
+err = new WError('top');
+err.name = 'CustomNameError';
+mod_assert.equal(err.toString(), 'CustomNameError: top');
