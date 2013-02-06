@@ -73,7 +73,7 @@ mod_assert.equal(err.toString(), 'WErrorChildNoName: top');
 // when the ctor is anonymous.
 var VErrorChildAnon = function () {
 	VError.apply(this, Array.prototype.slice.call(arguments));
-}
+};
 mod_util.inherits(VErrorChildAnon, VError);
 VErrorChildAnon.prototype.name = 'VErrorChildAnon';
 err = new VErrorChildAnon('top');
@@ -81,7 +81,7 @@ mod_assert.equal(err.toString(), 'VErrorChildAnon: top');
 
 var WErrorChildAnon = function () {
 	WError.apply(this, Array.prototype.slice.call(arguments));
-}
+};
 mod_util.inherits(WErrorChildAnon, WError);
 WErrorChildAnon.prototype.name = 'WErrorChildAnon';
 err = new WErrorChildAnon('top');

@@ -127,7 +127,8 @@ mod_assert.ok(err.cause() === suberr);
 suberr = new VError(new Error('root cause'), 'mid');
 err = new WError(suberr, 'top');
 mod_assert.equal(err.message, 'top');
-mod_assert.equal(err.toString(), 'WError: top; caused by VError: mid: root cause');
+mod_assert.equal(err.toString(),
+    'WError: top; caused by VError: mid: root cause');
 mod_assert.ok(err.cause() === suberr);
 
 /* null cause (for backwards compatibility with older versions) */
