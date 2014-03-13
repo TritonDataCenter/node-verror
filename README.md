@@ -1,24 +1,39 @@
 # verror: richer JavaScript errors
 
-This module provides two classes: VError, for accretive errors, and WError, for
-wrapping errors.  Both support printf-style error messages using extsprintf.
+This module provides two classes:
 
-## Printf-style errors
+* VError, for combining errors while preserving each one's error message, and
+* WError, for wrapping errors.
+
+Both support printf-style error messages using
+[extsprintf](https://github.com/davepacheco/node-extsprintf).
+
+## printf-style Error constructor
 
 At the most basic level, VError is just like JavaScript's Error class, but with
 printf-style arguments:
 
-    var verror = require('verror');
+```javascript
+var VError = require('verror');
 
-    var opname = 'read';
-    var err = new verror.VError('"%s" operation failed', opname);
-    console.log(err.message);
-    console.log(err.stack);
+var filename = '/etc/passwd';
+var err = new VError('missing file: "%s"', filename);
+console.log(err.message);
+```
 
 This prints:
 
-    "read" operation failed
-    "read" operation failed
+    missing file: "/etc/passwd"
+
+`err.stack` works the same as for built-in errors:
+
+```javascript
+console.log(err.stack);
+```
+
+This prints:
+
+    missing file: "/etc/passwd"
         at Object.<anonymous> (/Users/dap/node-verror/examples/varargs.js:4:11)
         at Module._compile (module.js:449:26)
         at Object.Module._extensions..js (module.js:467:10)
@@ -28,66 +43,63 @@ This prints:
         at process.startup.processNextTick.process._tickCallback (node.js:244:9)
 
 
-## VError for accretive error messages
+## Causes
 
-More interestingly, you can use VError to build up an error describing what
-happened at various levels in the stack.  For example, suppose you have a
-request handler that stats a file and fails if it doesn't exist:
+You can also pass a `cause` argument, which is another Error.  For example:
 
-    var fs = require('fs');
-    var verror = require('verror');
+```javascript
+var fs = require('fs');
+var VError = require('verror');
 
-    function checkFile(filename, callback) {
-        fs.stat(filename, function (err) {
-            if (err)
-		/* Annotate the "stat" error with what we were doing. */
-	    	return (callback(new verror.VError(err,
-		    'failed to check "%s"', filename)));
+var filename = '/nonexistent';
+fs.stat(filename, function (err1) {
+	var err2 = new VError(err1, 'stat "%s"', filename);
+	console.error(err2.message);
+});
+```
 
-	    /* ... */
-        });
-    }
+This prints out:
 
-    function handleRequest(filename, callback) {
-    	checkFile('/nonexistent', function (err) {
-    	    if (err) {
-    	    	/* Annotate the "checkFile" error with what we were doing. */
-    	    	return (callback(new verror.VError(err, 'request failed')));
-    	    }
+    stat failed: ENOENT, stat '/nonexistent'
 
-    	    /* ... */
-    	});
-    }
+which resembles how Unix programs typically report errors:
 
-    handleRequest('/nonexistent', function (err) {
-	if (err)
-		console.log(err.message);
-	/* ... */
-    });
+    $ sort /nonexistent
+    sort: open failed: /nonexistent: No such file or directory
 
-Since the file "/nonexistent" doesn't exist, this prints out:
+To match the Unixy feel, just prepend the program's name to the VError's
+`message`.
 
-    request failed: failed to check "/nonexistent": ENOENT, stat '/nonexistent'
+You can also get the next-level Error using `err.cause()`:
 
-The idea here is that the lowest level (Node's "fs.stat" function) generates an
-arbitrary error, and each higher level (request handler and stat callback)
-creates a new VError that annotates the previous error with what it was doing,
-so that the result is a clear message explaining what failed at each level.
+```javascript
+console.error(err2.cause().message);
+```
 
-This plays nicely with extsprintf's "%r" specifier, which prints out a
-Java-style stacktrace with the whole chain of exceptions:
+prints:
 
-    EXCEPTION: VError: request failed: failed to check "/nonexistent": ENOENT, stat '/nonexistent'
-        at /Users/dap/work/node-verror/examples/levels.js:21:21
-        at /Users/dap/work/node-verror/examples/levels.js:9:12
-        at Object.oncomplete (fs.js:297:15)
-    Caused by: EXCEPTION: VError: failed to check "/nonexistent": ENOENT, stat '/nonexistent'
-        at /Users/dap/work/node-verror/examples/levels.js:9:21
-        at Object.oncomplete (fs.js:297:15)
-    Caused by: EXCEPTION: Error: Error: ENOENT, stat '/nonexistent'
+    ENOENT, stat '/nonexistent'
+
+Of course, you can nest these as many times as you want:
+
+```javascript
+var VError = require('verror');
+var err1 = new Error('No such file or directory');
+var err2 = new VError(err1, 'failed to stat "%s"', '/junk');
+var err3 = new VError(err2, 'request failed');
+console.error(err3.message);
+```
+
+This prints:
+
+    request failed: failed to stat "/junk": No such file or directory
+
+The idea is that each layer in the stack annotates the error with a description
+of what it was doing (with a printf-like format string) and the result is a
+message that explains what happened at every level.
 
 
-## WError for wrapped errors
+## WError: wrap layered errors
 
 Sometimes you don't want an Error's "message" field to include the details of
 all of the low-level errors, but you still want to be able to get at them
@@ -98,15 +110,15 @@ WError, which is created exactly like VError (and also supports both
 printf-style arguments and an optional cause), but the resulting "message" only
 contains the top-level error.  It's also more verbose, including the class
 associated with each error in the cause chain.  Using the same example above,
-but replacing the VError in handleRequest with WError, we get this output:
+but replacing `err3`'s VError with WError, we get this output:
 
     request failed
 
 That's what we wanted -- just a high-level summary for the client.  But we can
 get the object's toString() for the full details:
 
-    WError: request failed; caused by WError: failed to check "/nonexistent";
-    caused by Error: ENOENT, stat '/nonexistent'
+    WError: request failed; caused by WError: failed to stat "/nonexistent";
+    caused by Error: No such file or directory
 
 # Contributing
 
