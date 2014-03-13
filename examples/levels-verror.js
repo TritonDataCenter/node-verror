@@ -1,12 +1,12 @@
 var extsprintf = require('extsprintf');
 var fs = require('fs');
-var verror = require('../lib/verror');
+var VError = require('../lib/verror');
 
 function checkFile(filename, callback) {
 	fs.stat(filename, function (err) {
 		if (err)
 			/* Annotate the "stat" error with what we were doing. */
-			return (callback(new verror.VError(err,
+			return (callback(new VError(err,
 			    'failed to check "%s"', filename)));
 
 		/* ... */
@@ -18,7 +18,7 @@ function handleRequest(filename, callback) {
 	checkFile('/nonexistent', function (err) {
 		if (err)
 			/* Annotate the "checkFile" error. */
-			return (callback(new verror.VError(
+			return (callback(new VError(
 			    err, 'request failed')));
 
 		/* ... */

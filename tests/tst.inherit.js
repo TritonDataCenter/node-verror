@@ -5,10 +5,8 @@
 var mod_assert = require('assert');
 var mod_util = require('util');
 
-var mod_verror = require('../lib/verror');
-
-var VError = mod_verror.VError;
-var WError = mod_verror.WError;
+var VError = require('../lib/verror');
+var WError = VError.WError;
 var err, suberr;
 
 function VErrorChild()
