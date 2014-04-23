@@ -1,17 +1,23 @@
 # verror: richer JavaScript errors
 
-This module provides two classes:
+This module provides two classes in support of Joyent's [Best Practices for Error
+Handling in Node.js].  If you find any of the behavior here confusing or
+surprising, 
+
+This module provides:
 
 * VError, for combining errors while preserving each one's error message, and
-* WError, for wrapping errors.
-
-Both support printf-style error messages using
-[extsprintf](https://github.com/davepacheco/node-extsprintf).
+* WError, for wrapping errors while hiding the lower-level messages from the
+  top-level error.  This is useful for API endpoints where you don't want to
+  expose internal error messages, but you still want to preserve the error chain
+  for logging and debugging.
 
 ## printf-style Error constructor
 
-At the most basic level, VError is just like JavaScript's Error class, but with
-printf-style arguments:
+Both VError and WError support printf-style error messages using
+[extsprintf](https://github.com/davepacheco/node-extsprintf).  If nothing else,
+you can use VError as a drop-in replacement for the built-in JavaScript Error
+class, with the addition of printf-style messages:
 
 ```javascript
 var VError = require('verror');
@@ -95,8 +101,29 @@ This prints:
     request failed: failed to stat "/junk": No such file or directory
 
 The idea is that each layer in the stack annotates the error with a description
-of what it was doing (with a printf-like format string) and the result is a
-message that explains what happened at every level.
+of what it was doing.  The end result is a message that explains what happened
+at each level.
+
+
+## Extra properties
+
+As described in Joyent's [Best Practices for Node.js Error Handling], it's
+useful to decorate Error objects with additional properties so that callers can
+not only handle each kind of error differently, but also construct their own
+error messages (e.g., to localize them, format them, aggregate them by kind, and
+so on).  To do this, pass an object as the first argument:
+
+    var VError = require('verror');
+    var err1 = new VError({
+	'remote_ip': '127.0.0.1'
+    }, 'couldn\'t connect to host "%s"', '127.0.0.1');
+    console.log(err1.message);
+    console.log(err1.remote_ip);
+
+prints:
+
+    couldn't connect to host "127.0.0.1"
+    127.0.0.1
 
 
 ## WError: wrap layered errors
