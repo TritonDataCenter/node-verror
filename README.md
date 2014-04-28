@@ -2,11 +2,11 @@
 
 This module provides two classes in support of Joyent's [Best Practices for Error
 Handling in Node.js].  If you find any of the behavior here confusing or
-surprising, 
+surprising, check out that document.
 
 This module provides:
 
-* VError, for combining errors while preserving each one's error message, and
+* VError, for chaining errors while preserving each one's error message, and
 * WError, for wrapping errors while hiding the lower-level messages from the
   top-level error.  This is useful for API endpoints where you don't want to
   expose internal error messages, but you still want to preserve the error chain
@@ -110,8 +110,9 @@ at each level.
 As described in Joyent's [Best Practices for Node.js Error Handling], it's
 useful to decorate Error objects with additional properties so that callers can
 not only handle each kind of error differently, but also construct their own
-error messages (e.g., to localize them, format them, aggregate them by kind, and
-so on).  To do this, pass an object as the first argument:
+error messages (e.g., to localize them, format them, aggregate them by type, and
+so on).  To add properties to an Error, pass them in an object as the first
+argument.  For example:
 
     var VError = require('verror');
     var err1 = new VError({
@@ -124,6 +125,13 @@ prints:
 
     couldn't connect to host "127.0.0.1"
     127.0.0.1
+
+If this error becomes the "cause" of another error, these properties are
+shallow-copied into the parent error.  This way, you can wrap errors without
+worrying about losing the extra information provided by the lower-level errors.
+
+The special properties "message" and "stack" are ignored.  The special property
+"cause" is used as the error's cause.
 
 
 ## WError: wrap layered errors
@@ -146,6 +154,33 @@ get the object's toString() for the full details:
 
     WError: request failed; caused by WError: failed to stat "/nonexistent";
     caused by Error: No such file or directory
+
+# Reference
+
+## VError(`sprintf_args...`)
+
+Constructs a new VError that behaves just like the built-in JavaScript `Error`
+class.  The error's `message` is constructed by passing the `sprintf_args` to
+node-extsprintf, so you can use a format string, as in `VError('file not found:
+"%s"', filename)`.  The error has no `cause` (`cause()` returns null) and no
+additional properties.
+
+## VError(`cause`, `sprintf_args...`) (where `cause` is an instance of `Error`)
+
+Similar to the first invocation, but after formatting `message` as described
+above, the message is combined with `cause.message`.  `cause()` on the new
+object returns `cause`.  Properties of `cause` other than `name`, `message`, and
+`stack` are shallow-copied into the new error.
+
+## VError(`options`, `sprintf_args...`)
+
+Similar to the first invocation, but supports setting additional properties on
+the new error.  `options` may contain:
+
+* `cause`: If present, this works like the `cause` argument to the second
+  invocation.  Otherwise, the new error has no cause.
+* `message`, `stack`: ignored
+* any other properties: shallow-copied directly into the new error object.
 
 # Contributing
 
