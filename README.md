@@ -1,8 +1,9 @@
 # verror: richer JavaScript errors
 
 This module provides two classes in support of Joyent's [Best Practices for Error
-Handling in Node.js].  If you find any of the behavior here confusing or
-surprising, check out that document.
+Handling in Node.js](http://www.joyent.com/developers/node/design/errors).  If
+you find any of the behavior here confusing or surprising, check out that
+document.
 
 This module provides:
 
@@ -107,11 +108,12 @@ at each level.
 
 ## Extra properties
 
-As described in Joyent's [Best Practices for Node.js Error Handling], it's
-useful to decorate Error objects with additional properties so that callers can
-not only handle each kind of error differently, but also construct their own
-error messages (e.g., to localize them, format them, aggregate them by type, and
-so on).  To add properties to an Error, pass them in an object as the first
+As described in Joyent's [Best Practices for Node.js Error
+Handling](http://www.joyent.com/developers/node/design/errors), it's useful to
+decorate Error objects with additional properties so that callers can not only
+handle each kind of error differently, but also construct their own error
+messages (e.g., to localize them, format them, aggregate them by type, and so
+on).  To add properties to an Error, pass them in an object as the first
 argument.  For example:
 
     var VError = require('verror');
