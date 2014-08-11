@@ -53,14 +53,14 @@ var VError = require('verror');
 
 var filename = '/nonexistent';
 fs.stat(filename, function (err1) {
-	var err2 = new VError(err1, 'stat failed: "%s"', filename);
+	var err2 = new VError(err1, 'stat "%s" failed', filename);
 	console.error(err2.message);
 });
 ```
 
 This prints out:
 
-    stat failed: "/nonexistent": ENOENT, stat '/nonexistent'
+    stat "/nonexistent" failed: ENOENT, stat '/nonexistent'
 
 which resembles how Unix programs typically report errors:
 
