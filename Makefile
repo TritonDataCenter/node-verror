@@ -30,6 +30,7 @@ test:
 	node tests/tst.inherit.js
 	node tests/tst.verror.js
 	node tests/tst.werror.js
+	node tests/tst.serror.js
 	@echo all tests passed
 
 include ./Makefile.targ

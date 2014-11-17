@@ -154,3 +154,9 @@ mod_assert.equal(stack, [
     'VError: test error',
     '    at Object.<anonymous> (tst.verror.js)'
 ].join('\n') + '\n' + nodestack);
+
+/* "null" or "undefined" as string for extsprintf */
+err = new VError('my %s string', null);
+mod_assert.equal('my null string', err.message);
+err = new VError('my %s string', undefined);
+mod_assert.equal('my undefined string', err.message);
