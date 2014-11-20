@@ -160,3 +160,10 @@ err = new VError('my %s string', null);
 mod_assert.equal('my null string', err.message);
 err = new VError('my %s string', undefined);
 mod_assert.equal('my undefined string', err.message);
+
+/* invoked without "new" */
+err = VError('my %s string', 'testing!');
+mod_assert.equal(err.name, 'VError');
+mod_assert.ok(err instanceof VError);
+mod_assert.ok(err instanceof Error);
+mod_assert.equal(err.message, 'my testing! string');
