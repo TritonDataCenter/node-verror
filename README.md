@@ -110,7 +110,17 @@ WError, which is created exactly like VError (and also supports both
 printf-style arguments and an optional cause), but the resulting "message" only
 contains the top-level error.  It's also more verbose, including the class
 associated with each error in the cause chain.  Using the same example above,
-but replacing `err3`'s VError with WError, we get this output:
+but replacing `err3`'s VError with WError, so that it looks like this:
+
+```javascript
+var verror = require('verror');
+var err1 = new Error('No such file or directory');
+var err2 = new verror.VError(err1, 'failed to stat "%s"', '/junk');
+var err3 = new verror.WError(err2, 'request failed');
+console.error(err3.message);
+```
+
+we get this output:
 
     request failed
 
@@ -119,6 +129,8 @@ get the object's toString() for the full details:
 
     WError: request failed; caused by WError: failed to stat "/nonexistent";
     caused by Error: No such file or directory
+
+For a complete example, see examples/werror.js.
 
 # Contributing
 
