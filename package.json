@@ -7,6 +7,9 @@
 		"type": "git",
 		"url": "git://github.com/davepacheco/node-verror.git"
 	},
+	"files": [
+		"./lib/verror.js"
+	],
 	"dependencies": {
 		"extsprintf": "1.2.0"
 	},
