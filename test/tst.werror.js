@@ -122,6 +122,23 @@ function main()
 	mod_assert.equal(err.toString(),
 	    'WError: top; caused by VError: mid: root cause');
 	mod_assert.ok(err.cause() === suberr);
+
+	suberr = new WError(new Error('root cause'), 'mid');
+	err = new WError(suberr, 'top');
+	stack = mod_testcommon.cleanStack(err.fullStack());
+	mod_assert.equal(stack, [
+		'WError: top',
+		'    at main (dummy filename)',
+		'    at Object.<anonymous> (dummy filename)'
+	].join('\n') + '\n' + nodestack + '\n' + [
+		'caused by: WError: mid',
+		'    at main (dummy filename)',
+		'    at Object.<anonymous> (dummy filename)'
+	].join('\n') + '\n' + nodestack + '\n' + [
+		'caused by: Error: root cause',
+		'    at main (dummy filename)',
+		'    at Object.<anonymous> (dummy filename)'
+	].join('\n') + '\n' + nodestack);
 }
 
 main();
