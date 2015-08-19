@@ -180,7 +180,7 @@ mod_assert.equal(stack, [
 
 suberr = new WError(new Error('root cause'), 'mid');
 err = new WError(suberr, 'top');
-stack = cleanStack(err.getFullStack());
+stack = cleanStack(err.fullStack());
 mod_assert.equal(stack, [
     'WError: top; caused by WError: mid; caused by Error: root cause',
     '    at Object.<anonymous> (tst.werror.js)'
