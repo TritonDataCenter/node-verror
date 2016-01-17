@@ -8,6 +8,7 @@
 		"url": "git://github.com/davepacheco/node-verror.git"
 	},
 	"dependencies": {
+		"core-util-is": "1.0.2",
 		"extsprintf": "1.2.0"
 	},
 	"engines": [
