@@ -47,7 +47,7 @@ mod_assert.equal(err.message, 'top');
 mod_assert.equal(err.toString(),
 	'WErrorChild: top; caused by Error: root cause');
 mod_assert.equal(err.stack.split('\n')[0],
-	'WErrorChild: top; caused by Error: root cause');
+	'WErrorChild: top');
 
 
 // Test that `<Ctor>.toString()` uses the ctor name. I.e. setting

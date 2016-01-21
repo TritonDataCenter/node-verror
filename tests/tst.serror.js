@@ -32,7 +32,7 @@ mod_assert.equal(err.message, '');
 mod_assert.ok(err.cause() === undefined);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'SError',
+    'VError',
     '    at Object.<anonymous> (tst.serror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -55,7 +55,7 @@ mod_assert.equal(err.message, 'something wrong?: hello 3 worlds');
 mod_assert.ok(err.cause() === suberr);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'SError: something wrong?: hello 3 worlds'
+    'VError: something wrong?: hello 3 worlds'
 ].join('\n') + '\n' + nodestack);
 
 /* bad arguments */
