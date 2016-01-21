@@ -15,10 +15,10 @@ var verr = new VError(err);
 mod_assert.ok(mod_isError(verr.cause()));
 
 var context = mod_vm.createContext({
-  callback: function callback(err) {
-    mod_assert.ok(mod_isError(err));
-    var verr = new VError(err);
-    mod_assert.ok(mod_isError(verr.cause()));
-  },
+	callback: function callback(err2) {
+		mod_assert.ok(mod_isError(err2));
+		var verr2 = new VError(err);
+		mod_assert.ok(mod_isError(verr2.cause()));
+	}
 });
 mod_vm.runInContext('callback(new Error())', context);
