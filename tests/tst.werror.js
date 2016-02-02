@@ -177,3 +177,17 @@ mod_assert.equal(stack, [
     'WError: test error',
     '    at Object.<anonymous> (tst.werror.js)'
 ].join('\n') + '\n' + nodestack);
+
+suberr = new WError(new Error('root cause'), 'mid');
+err = new WError(suberr, 'top');
+stack = cleanStack(err.fullStack());
+mod_assert.equal(stack, [
+    'WError: top; caused by WError: mid; caused by Error: root cause',
+    '    at Object.<anonymous> (tst.werror.js)'
+].join('\n') + '\n' + nodestack + '\n' + [
+    'caused by: WError: mid; caused by Error: root cause',
+    '    at Object.<anonymous> (tst.werror.js)'
+].join('\n') + '\n' + nodestack + '\n' + [
+    'caused by: Error: root cause',
+    '    at Object.<anonymous> (tst.werror.js)'
+].join('\n') + '\n' + nodestack);
