@@ -94,7 +94,7 @@ mod_assert.equal(err.toString(), 'WError: proximate cause: 3 issues; ' +
 mod_assert.ok(err.cause() === suberr);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'WError: proximate cause: 3 issues; caused by Error: root cause',
+    'WError: proximate cause: 3 issues',
     '    at Object.<anonymous> (tst.werror.js)'
 ].join('\n') + '\n' + nodestack);
 
@@ -105,7 +105,7 @@ mod_assert.equal(err.toString(), 'WError: proximate cause: 3 issues; ' +
 mod_assert.ok(err.cause() === suberr);
 stack = cleanStack(err.stack);
 mod_assert.equal(stack, [
-    'WError: proximate cause: 3 issues; caused by Error: root cause',
+    'WError: proximate cause: 3 issues',
     '    at Object.<anonymous> (tst.werror.js)'
 ].join('\n') + '\n' + nodestack);
 
