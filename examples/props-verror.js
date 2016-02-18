@@ -41,7 +41,7 @@ function dump(err)
 	 */
 	if (props.indexOf('name') == -1)
 		props.unshift('name');
-	
+
 	console.log('%s',
 	    sprintf('%15s: %s', 'constructor', err.constructor.name));
 	for (i = 0; i < props.length; i++) {

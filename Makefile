@@ -32,6 +32,7 @@ test:
 	node tests/tst.werror.js
 	node tests/tst.serror.js
 	node tests/tst.context.js
+	node tests/tst.props.js
 	@echo all tests passed
 
 include ./Makefile.targ
