@@ -200,6 +200,45 @@ generally be plain objects (i.e., consisting only of null, undefined, numbers,
 booleans, strings, and objects and arrays containing only other plain objects).
 
 
+## Examples
+
+The "Demo" section above covers several basic cases.  Here's a more advanced
+case:
+
+```javascript
+var err1 = new VError('something bad happened');
+/* ... */
+var err2 = new VError({
+    'name': 'ConnectionError',
+    'cause': err1,
+    'info': {
+        'errno': 'ECONNREFUSED',
+        'remote_ip': '127.0.0.1',
+        'port': 215
+    }
+}, 'failed to connect to "%s:%d"', '127.0.0.1', 215);
+
+console.log(err2.message);
+console.log(err2.name);
+console.log(err2.info());
+console.log(err2.stack);
+```
+
+This outputs:
+
+    failed to connect to "127.0.0.1:215": something bad happened
+    ConnectionError
+    { errno: 'ECONNREFUSED', remote_ip: '127.0.0.1', port: 215 }
+    ConnectionError: failed to connect to "127.0.0.1:215": something bad happened
+        at Object.<anonymous> (/home/dap/node-verror/examples/info.js:5:12)
+        at Module._compile (module.js:456:26)
+        at Object.Module._extensions..js (module.js:474:10)
+        at Module.load (module.js:356:32)
+        at Function.Module._load (module.js:312:12)
+        at Function.Module.runMain (module.js:497:10)
+        at startup (node.js:119:16)
+        at node.js:935:3
+
 # Reference: MultiError
 
 MultiError is an Error class that represents a group of Errors.  This is used
