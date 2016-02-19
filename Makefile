@@ -11,6 +11,7 @@
 #
 # Tools
 #
+CATEST		 = deps/catest/catest
 NPM		 = npm
 
 #
@@ -26,13 +27,10 @@ all:
 	$(NPM) install
 
 .PHONY: test
-test:
-	node tests/tst.inherit.js
-	node tests/tst.verror.js
-	node tests/tst.werror.js
-	node tests/tst.serror.js
-	node tests/tst.context.js
-	node tests/tst.props.js
+test: $(CATEST)
+	$(CATEST) -a
 	@echo all tests passed
+
+$(CATEST): deps/catest/.git
 
 include ./Makefile.targ
