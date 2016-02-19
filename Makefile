@@ -29,7 +29,6 @@ all:
 .PHONY: test
 test: $(CATEST)
 	$(CATEST) -a
-	@echo all tests passed
 
 $(CATEST): deps/catest/.git
 
