@@ -49,9 +49,10 @@ mod_assert.equal(err.toString(),
 mod_assert.equal(err.stack.split('\n')[0],
 	'WErrorChild: top; caused by Error: root cause');
 
-
-// Test that `<Ctor>.toString()` uses the ctor name. I.e. setting
-// `<Ctor>.prototype.name` isn't necessary.
+/*
+ * Test that "<Ctor>.toString()" uses the constructor name, so that setting
+ * "<Ctor>.prototype.name" isn't necessary.
+ */
 function VErrorChildNoName() {
 	VError.apply(this, Array.prototype.slice.call(arguments));
 }
@@ -67,8 +68,10 @@ err = new WErrorChildNoName('top');
 mod_assert.equal(err.toString(), 'WErrorChildNoName: top');
 
 
-// Test that `<Ctor>.prototype.name` can be used for the `.toString()`
-// when the ctor is anonymous.
+/*
+ * Test that `<Ctor>.prototype.name` can be used for the `.toString()`
+ * when the ctor is anonymous.
+ */
 var VErrorChildAnon = function () {
 	VError.apply(this, Array.prototype.slice.call(arguments));
 };
@@ -85,10 +88,9 @@ WErrorChildAnon.prototype.name = 'WErrorChildAnon';
 err = new WErrorChildAnon('top');
 mod_assert.equal(err.toString(), 'WErrorChildAnon: top');
 
-
-// Test get appropriate exception name in `.toString()` when reconstituting
-// an error instance a la:
-//    https://github.com/mcavage/node-fast/blob/master/lib/client.js#L215
+/*
+ * Test that we get an appropriate exception name in toString() output.
+ */
 err = new VError('top');
 err.name = 'CustomNameError';
 mod_assert.equal(err.toString(), 'CustomNameError: top');
