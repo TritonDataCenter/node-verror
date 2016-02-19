@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012, Joyent, Inc. All rights reserved.
+# Copyright (c) 2016, Joyent, Inc. All rights reserved.
 #
 # Makefile: top-level Makefile
 #
@@ -17,7 +17,7 @@ NPM		 = npm
 #
 # Files
 #
-JS_FILES	:= $(shell find lib examples tests -name '*.js')
+JS_FILES	:= $(shell find lib examples test -name '*.js')
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSL_CONF_NODE	 = jsl.node.conf

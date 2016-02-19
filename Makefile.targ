@@ -1,6 +1,14 @@
 # -*- mode: makefile -*-
 #
-# Copyright (c) 2012, Joyent, Inc. All rights reserved.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2014, Joyent, Inc.
+#
+
 #
 # Makefile.targ: common targets.
 #
@@ -58,9 +66,13 @@
 #	JSL_FILES_NODE	JavaScript files to check with Node config file.
 #	JSL_FILES_WEB	JavaScript files to check with Web config file.
 #
+#	JSON_FILES	JSON files to be validated
+#
+#	JSSTYLE_FILES	JavaScript files to be style-checked
+#
 # You can also override these variables:
 #
-#	BASH		Path to bash (default: bash)
+#	BASH		Path to bash (default: "bash")
 #
 #	CSCOPE_DIRS	Directories to search for source files for the cscope
 #			index. (default: ".")
@@ -71,9 +83,15 @@
 #	JSL_FLAGS_WEB
 #	JSL_FLAGS
 #
-#	JSSTYLE		Path to jsstyle (default: jsstyle)
+#	JSON		Path to json tool (default: "json")
+#
+#	JSSTYLE		Path to jsstyle (default: "jsstyle")
 #
 #	JSSTYLE_FLAGS	Additional flags to pass through to jsstyle
+#
+#	RESTDOWN_EXT	By default '.restdown' is required for DOC_FILES
+#			(see above). If you want to use, say, '.md' instead, then
+#			set 'RESTDOWN_EXT=.md' in your Makefile.
 #
 
 #
@@ -85,10 +103,12 @@ CP		?= cp
 CSCOPE		?= cscope
 CSCOPE_DIRS	?= .
 JSL		?= jsl
+JSON		?= json
 JSSTYLE		?= jsstyle
 MKDIR		?= mkdir -p
 MV		?= mv
 RESTDOWN_FLAGS	?=
+RESTDOWN_EXT	?= .restdown
 RMTREE		?= rm -rf
 JSL_FLAGS  	?= --nologo --nosummary
 
@@ -157,27 +177,39 @@ check-bash: $(BASH_FILES:%=%.bashchk) $(BASH_FILES:%=%.bashstyle)
 %.bashstyle: %
 	$(BASHSTYLE) $^
 
-.PHONY: check-jsl check-jsl-node check-jsl-web
-check-jsl: check-jsl-node check-jsl-web
+.PHONY: check-json
+check-json: $(JSON_FILES:%=%.jsonchk)
 
-check-jsl-node: $(JSL_FILES_NODE:%=%.jslnodechk)
+%.jsonchk: %
+	$(JSON) --validate -f $^
 
-check-jsl-web: $(JSL_FILES_WEB:%=%.jslwebchk)
+#
+# The above approach can be slow when there are many files to check because it
+# requires that "make" invoke the check tool once for each file, rather than
+# passing in several files at once.  For the JavaScript check targets, we define
+# a variable for the target itself *only if* the list of input files is
+# non-empty.  This avoids invoking the tool if there are no files to check.
+#
+JSL_NODE_TARGET = $(if $(JSL_FILES_NODE), check-jsl-node)
+.PHONY: check-jsl-node
+check-jsl-node: $(JSL_EXEC)
+	$(JSL) $(JSL_FLAGS) $(JSL_FLAGS_NODE) $(JSL_FILES_NODE)
 
-%.jslnodechk: % $(JSL_EXEC)
-	$(JSL) $(JSL_FLAGS) $(JSL_FLAGS_NODE) $<
+JSL_WEB_TARGET = $(if $(JSL_FILES_WEB), check-jsl-web)
+.PHONY: check-jsl-web
+check-jsl-web: $(JSL_EXEC)
+	$(JSL) $(JSL_FLAGS) $(JSL_FLAGS_WEB) $(JSL_FILES_WEB)
 
-%.jslwebchk: % $(JSL_EXEC)
-	$(JSL) $(JSL_FLAGS) $(JSL_FLAGS_WEB) $<
+.PHONY: check-jsl
+check-jsl: $(JSL_NODE_TARGET) $(JSL_WEB_TARGET)
 
+JSSTYLE_TARGET = $(if $(JSSTYLE_FILES), check-jsstyle)
 .PHONY: check-jsstyle
-check-jsstyle: $(JSSTYLE_FILES:%=%.jsstylechk)
-
-%.jsstylechk: % $(JSSTYLE_EXEC)
-	$(JSSTYLE) $(JSSTYLE_FLAGS) $<
+check-jsstyle:  $(JSSTYLE_EXEC)
+	$(JSSTYLE) $(JSSTYLE_FLAGS) $(JSSTYLE_FILES)
 
 .PHONY: check
-check: check-jsl check-jsstyle check-bash
+check: check-jsl check-json $(JSSTYLE_TARGET) check-bash
 	@echo check ok
 
 .PHONY: clean
@@ -233,25 +265,25 @@ DOC_MEDIA_FILES_BUILD := $(DOC_MEDIA_FILES:%=$(DOC_BUILD)/media/%)
 #
 .PHONY: docs
 docs:							\
-    $(DOC_FILES:%.restdown=$(DOC_BUILD)/%.html)		\
-    $(DOC_FILES:%.restdown=$(DOC_BUILD)/%.json)		\
-    $(DOC_MEDIA_FILES_BUILD)
+	$(DOC_FILES:%$(RESTDOWN_EXT)=$(DOC_BUILD)/%.html)		\
+	$(DOC_FILES:%$(RESTDOWN_EXT)=$(DOC_BUILD)/%.json)		\
+	$(DOC_MEDIA_FILES_BUILD)
 
 #
 # We keep the intermediate files so that the next build can see whether the
 # files in DOC_BUILD are up to date.
 #
 .PRECIOUS:					\
-    $(DOC_FILES:%.restdown=docs/%.html)		\
-    $(DOC_FILES:%.restdown=docs/%json)
+	$(DOC_FILES:%$(RESTDOWN_EXT)=docs/%.html)		\
+	$(DOC_FILES:%$(RESTDOWN_EXT)=docs/%json)
 
 #
 # We do clean those intermediate files, as well as all of DOC_BUILD.
 #
 CLEAN_FILES +=					\
-    $(DOC_BUILD)				\
-    $(DOC_FILES:%.restdown=docs/%.html)		\
-    $(DOC_FILES:%.restdown=docs/%.json)
+	$(DOC_BUILD)				\
+	$(DOC_FILES:%$(RESTDOWN_EXT)=docs/%.html)		\
+	$(DOC_FILES:%$(RESTDOWN_EXT)=docs/%.json)
 
 #
 # Before installing the files, we must make sure the directories exist. The |
@@ -264,7 +296,7 @@ $(DOC_MEDIA_FILES_BUILD): | $(DOC_MEDIA_DIRS_BUILD)
 $(DOC_BUILD)/%: docs/% | $(DOC_BUILD)
 	$(CP) $< $@
 
-docs/%.json docs/%.html: docs/%.restdown | $(DOC_BUILD) $(RESTDOWN_EXEC)
+docs/%.json docs/%.html: docs/%$(RESTDOWN_EXT) | $(DOC_BUILD) $(RESTDOWN_EXEC)
 	$(RESTDOWN) $(RESTDOWN_FLAGS) -m $(DOC_BUILD) $<
 
 $(DOC_BUILD):
