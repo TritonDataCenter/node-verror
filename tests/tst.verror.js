@@ -1,25 +1,15 @@
 /*
- * tst.verror.js: tests basic functionality of the VError class.
+ * tst.verror.js: tests functionality that's specific to the VError and SError
+ * classes.
  */
 
 var mod_assert = require('assert');
 var mod_verror = require('../lib/verror');
+var mod_testcommon = require('./common');
 
+var SError = mod_verror.SError;
 var VError = mod_verror.VError;
 var WError = mod_verror.WError;
-
-var err, suberr, stack, substack;
-
-/*
- * Remove full paths and relative line numbers from stack traces so that we can
- * compare against "known-good" output.
- */
-function cleanStack(stacktxt)
-{
-	var re = new RegExp(__filename + ':\\d+:\\d+', 'gm');
-	stacktxt = stacktxt.replace(re, 'tst.verror.js');
-	return (stacktxt);
-}
 
 /*
  * Save the generic parts of all stack traces so we can avoid hardcoding
@@ -27,143 +17,81 @@ function cleanStack(stacktxt)
  */
 var nodestack = new Error().stack.split('\n').slice(2).join('\n');
 
-/* no arguments */
-err = new VError();
-mod_assert.equal(err.name, 'VError');
-mod_assert.ok(err instanceof Error);
-mod_assert.ok(err instanceof VError);
-mod_assert.equal(err.message, '');
-mod_assert.ok(err.cause() === undefined);
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
+function main()
+{
+	var err, suberr, stack;
 
-/* options-argument form */
-err = new VError({});
-mod_assert.equal(err.message, '');
-mod_assert.ok(err.cause() === undefined);
+	console.error('running VError/SError tests');
 
-/* simple message */
-err = new VError('my error');
-mod_assert.equal(err.message, 'my error');
-mod_assert.ok(err.cause() === undefined);
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError: my error',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
+	/* "null" or "undefined" as string for extsprintf */
+	err = new VError('my %s string', null);
+	mod_assert.equal('my null string', err.message);
+	err = new VError('my %s string', undefined);
+	mod_assert.equal('my undefined string', err.message);
 
-err = new VError({}, 'my error');
-mod_assert.equal(err.message, 'my error');
-mod_assert.ok(err.cause() === undefined);
+	mod_assert.throws(function () {
+		console.error(
+		    new VError({ 'strict': true }, 'my %s string', null));
+	}, /attempted to print undefined or null as a string/);
+	mod_assert.throws(function () {
+		console.error(new SError('my %s string', undefined));
+	}, /attempted to print undefined or null as a string/);
 
-/* printf-style message */
-err = new VError('%s error: %3d problems', 'very bad', 15);
-mod_assert.equal(err.message, 'very bad error:  15 problems');
-mod_assert.ok(err.cause() === undefined);
+	mod_assert.throws(function () {
+		console.error(new SError('my %s string', null));
+	}, /attempted to print undefined or null as a string/);
+	mod_assert.throws(function () {
+		console.error(new SError('my %s string', undefined));
+	}, /attempted to print undefined or null as a string/);
 
-err = new VError({}, '%s error: %3d problems', 'very bad', 15);
-mod_assert.equal(err.message, 'very bad error:  15 problems');
-mod_assert.ok(err.cause() === undefined);
+	/* caused by another error, with no additional message */
+	suberr = new Error('root cause');
+	err = new VError(suberr);
+	mod_assert.equal(err.message, ': root cause');
+	mod_assert.ok(err.cause() === suberr);
 
-/* caused by another error, with no additional message */
-suberr = new Error('root cause');
-err = new VError(suberr);
-mod_assert.equal(err.message, ': root cause');
-mod_assert.ok(err.cause() === suberr);
+	err = new VError({ 'cause': suberr });
+	mod_assert.equal(err.message, ': root cause');
+	mod_assert.ok(err.cause() === suberr);
 
-err = new VError({ 'cause': suberr });
-mod_assert.equal(err.message, ': root cause');
-mod_assert.ok(err.cause() === suberr);
+	/* caused by another error, with annotation */
+	err = new VError(suberr, 'proximate cause: %d issues', 3);
+	mod_assert.equal(err.message, 'proximate cause: 3 issues: root cause');
+	mod_assert.ok(err.cause() === suberr);
+	stack = mod_testcommon.cleanStack(err.stack);
+	mod_assert.equal(stack, [
+	    'VError: proximate cause: 3 issues: root cause',
+	    '    at main (dummy filename)',
+	    '    at Object.<anonymous> (dummy filename)'
+	].join('\n') + '\n' + nodestack);
 
-/* caused by another error, with annotation */
-err = new VError(suberr, 'proximate cause: %d issues', 3);
-mod_assert.equal(err.message, 'proximate cause: 3 issues: root cause');
-mod_assert.ok(err.cause() === suberr);
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError: proximate cause: 3 issues: root cause',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
+	err = new SError({ 'cause': suberr }, 'proximate cause: %d issues', 3);
+	mod_assert.equal(err.message, 'proximate cause: 3 issues: root cause');
+	mod_assert.ok(err.cause() === suberr);
+	stack = mod_testcommon.cleanStack(err.stack);
+	mod_assert.equal(stack, [
+	    'SError: proximate cause: 3 issues: root cause',
+	    '    at main (dummy filename)',
+	    '    at Object.<anonymous> (dummy filename)'
+	].join('\n') + '\n' + nodestack);
 
-err = new VError({ 'cause': suberr }, 'proximate cause: %d issues', 3);
-mod_assert.equal(err.message, 'proximate cause: 3 issues: root cause');
-mod_assert.ok(err.cause() === suberr);
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError: proximate cause: 3 issues: root cause',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
+	/* caused by another VError, with annotation. */
+	suberr = err;
+	err = new VError(suberr, 'top');
+	mod_assert.equal(err.message,
+	    'top: proximate cause: 3 issues: root cause');
+	mod_assert.ok(err.cause() === suberr);
 
-/* caused by another VError, with annotation. */
-suberr = err;
-err = new VError(suberr, 'top');
-mod_assert.equal(err.message, 'top: proximate cause: 3 issues: root cause');
-mod_assert.ok(err.cause() === suberr);
+	err = new VError({ 'cause': suberr }, 'top');
+	mod_assert.equal(err.message,
+	    'top: proximate cause: 3 issues: root cause');
+	mod_assert.ok(err.cause() === suberr);
 
-err = new VError({ 'cause': suberr }, 'top');
-mod_assert.equal(err.message, 'top: proximate cause: 3 issues: root cause');
-mod_assert.ok(err.cause() === suberr);
-
-/* caused by a WError */
-suberr = new WError(new Error('root cause'), 'mid');
-err = new VError(suberr, 'top');
-mod_assert.equal(err.message, 'top: mid');
-mod_assert.ok(err.cause() === suberr);
-
-/* null cause (for backwards compatibility with older versions) */
-err = new VError(null, 'my error');
-mod_assert.equal(err.message, 'my error');
-mod_assert.ok(err.cause() === undefined);
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError: my error',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
-
-err = new VError({ 'cause': null }, 'my error');
-mod_assert.equal(err.message, 'my error');
-mod_assert.ok(err.cause() === undefined);
-
-err = new VError(null);
-mod_assert.equal(err.message, '');
-mod_assert.ok(err.cause() === undefined);
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
-
-/* constructorOpt */
-function makeErr(options) {
-	return (new VError(options, 'test error'));
+	/* caused by a WError */
+	suberr = new WError(new Error('root cause'), 'mid');
+	err = new VError(suberr, 'top');
+	mod_assert.equal(err.message, 'top: mid');
+	mod_assert.ok(err.cause() === suberr);
 }
-err = makeErr({});
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError: test error',
-    '    at makeErr (tst.verror.js)',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
 
-err = makeErr({ 'constructorOpt': makeErr });
-stack = cleanStack(err.stack);
-mod_assert.equal(stack, [
-    'VError: test error',
-    '    at Object.<anonymous> (tst.verror.js)'
-].join('\n') + '\n' + nodestack);
-
-/* "null" or "undefined" as string for extsprintf */
-err = new VError('my %s string', null);
-mod_assert.equal('my null string', err.message);
-err = new VError('my %s string', undefined);
-mod_assert.equal('my undefined string', err.message);
-
-/* invoked without "new" */
-err = VError('my %s string', 'testing!');
-mod_assert.equal(err.name, 'VError');
-mod_assert.ok(err instanceof VError);
-mod_assert.ok(err instanceof Error);
-mod_assert.equal(err.message, 'my testing! string');
+main();
