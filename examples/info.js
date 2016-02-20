@@ -16,3 +16,16 @@ console.log(err2.message);
 console.log(err2.name);
 console.log(err2.info());
 console.log(err2.stack);
+
+var err3 = new VError({
+    'name': 'RequestError',
+    'cause': err2,
+    'info': {
+        'errno': 'EBADREQUEST'
+    }
+}, 'request failed');
+
+console.log(err3.message);
+console.log(err3.name);
+console.log(err3.info());
+console.log(err3.stack);

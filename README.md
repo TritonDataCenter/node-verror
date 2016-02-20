@@ -239,6 +239,40 @@ This outputs:
         at startup (node.js:119:16)
         at node.js:935:3
 
+Information properties are inherited up the cause chain, with values at the top
+of the chain overriding same-named values lower in the chain.  To continue that
+example:
+
+```javascript
+var err3 = new VError({
+    'name': 'RequestError',
+    'cause': err2,
+    'info': {
+        'errno': 'EBADREQUEST'
+    }
+}, 'request failed');
+
+console.log(err3.message);
+console.log(err3.name);
+console.log(err3.info());
+console.log(err3.stack);
+```
+
+This outputs:
+
+    request failed: failed to connect to "127.0.0.1:215": something bad happened
+    RequestError
+    { errno: 'EBADREQUEST', remote_ip: '127.0.0.1', port: 215 }
+    RequestError: request failed: failed to connect to "127.0.0.1:215": something bad happened
+        at Object.<anonymous> (/home/dap/node-verror/examples/info.js:20:12)
+        at Module._compile (module.js:456:26)
+        at Object.Module._extensions..js (module.js:474:10)
+        at Module.load (module.js:356:32)
+        at Function.Module._load (module.js:312:12)
+        at Function.Module.runMain (module.js:497:10)
+        at startup (node.js:119:16)
+        at node.js:935:3
+
 # Reference: MultiError
 
 MultiError is an Error class that represents a group of Errors.  This is used
