@@ -141,7 +141,7 @@ Option name      | Type             | Meaning
 `cause`          | any Error object | Indicates that the new error was caused by `cause`.  See `cause()` below.  If unspecified, the cause will be `null`.
 `strict`         | boolean          | If true, then `null` and `undefined` values in `sprintf_args` are passed through to `sprintf()`.  Otherwise, these are replaced with the strings `'null'`, and '`undefined`', respectively.
 `constructorOpt` | function         | If specified, then the stack trace for this error ends at function `constructorOpt`.  Functions called by `constructorOpt` will not show up in the stack.  This is useful when this class is subclassed.
-`info`           | object           | Specifies arbitrary informational properties that are available through the `info()` method.  See that method for details.
+`info`           | object           | Specifies arbitrary informational properties that are available through the `VError.info(err)` static class method.  See that method for details.
 
 The second form is equivalent to using the first form with the specified `cause`
 as the error's cause.  This form is distinguished from the first form because
@@ -164,9 +164,9 @@ JavaScript's built-in Error objects.
 
 Property name | Type   | Meaning
 ------------- | ------ | -------
-`name`      | string | Programmatically-usable name of the error.
-`message`   | string | Human-readable summary of the failure.  Programmatically-accessible details are provided through `info()` method.
-`stack`     | string | Human-readable stack trace where the Error was constructed.
+`name`        | string | Programmatically-usable name of the error.
+`message`     | string | Human-readable summary of the failure.  Programmatically-accessible details are provided through `VError.info(err)` class method.
+`stack`       | string | Human-readable stack trace where the Error was constructed.
 
 For all of these classes, the printf-style arguments passed to the constructor
 are processed with `sprintf()` to form a message.  For `WError`, this becomes
@@ -178,14 +178,22 @@ The `stack` property is managed entirely by the underlying JavaScript
 implementation.  It's generally implemented using a getter function because
 constructing the human-readable stack trace is somewhat expensive.
 
-## Public methods
+## Class methods
 
-### `cause()`
+The following methods are defined on the `VError` class and as exported
+functions on the `verror` module.  They're defined this way rather than using
+methods on VError instances so that they can be used on Errors not created with
+`VError`.
 
-The `cause()` function returns the object specified as the cause in the
-constructor.  If none was specified, it returns `null`.
+### `VError.cause(err)`
 
-### `info()`
+The `cause()` function returns the next Error in the cause chain for `err`, or
+`null` if there is no next error.  See the `cause` argument to the constructor.
+Errors can have arbitrarily long cause chains.  You can walk the `cause` chain
+by invoking `VError.cause(err)` on each subsequent return value.  If `err` is
+not a `VError`, the cause is `null`.
+
+### `VError.info(err)`
 
 Returns an object with all of the extra error information that's been associated
 with this Error and all of its causes.  These are the properties passed in using
@@ -220,7 +228,7 @@ var err2 = new VError({
 
 console.log(err2.message);
 console.log(err2.name);
-console.log(err2.info());
+console.log(VError.info(err2));
 console.log(err2.stack);
 ```
 
@@ -254,7 +262,7 @@ var err3 = new VError({
 
 console.log(err3.message);
 console.log(err3.name);
-console.log(err3.info());
+console.log(VError.info(err3));
 console.log(err3.stack);
 ```
 

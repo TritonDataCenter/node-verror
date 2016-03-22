@@ -33,7 +33,7 @@ function runTests(cons, label)
 	 * later, it's the value of the "name" property on the Error when it was
 	 * constructed.
 	 */
-	if (/^0\.10\./.test(process.versions['node'])) {
+	if (mod_testcommon.oldNode()) {
 		stackname = cons.name;
 	} else {
 		stackname = label;

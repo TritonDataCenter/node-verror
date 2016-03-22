@@ -19,7 +19,7 @@ var nodestack = new Error().stack.split('\n').slice(2).join('\n');
 
 function main()
 {
-	var err, suberr, stack;
+	var err, suberr, stack, stackname;
 
 	console.error('running VError/SError tests');
 
@@ -69,8 +69,10 @@ function main()
 	mod_assert.equal(err.message, 'proximate cause: 3 issues: root cause');
 	mod_assert.ok(err.cause() === suberr);
 	stack = mod_testcommon.cleanStack(err.stack);
+	/* See the comment in tst.common.js. */
+	stackname = mod_testcommon.oldNode() ? 'SError': 'VError';
 	mod_assert.equal(stack, [
-	    'SError: proximate cause: 3 issues: root cause',
+	    stackname + ': proximate cause: 3 issues: root cause',
 	    '    at main (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);

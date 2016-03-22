@@ -18,7 +18,7 @@ err2 = new VError({
 }, 'worse');
 mod_assert.equal(err2.cause(), err1);
 mod_assert.equal(err2.message, 'worse: bad');
-mod_assert.deepEqual(err2.info(), {});
+mod_assert.deepEqual(VError.info(err2), {});
 
 /* simple info usage */
 err1 = new VError({
@@ -29,7 +29,7 @@ err1 = new VError({
     }
 }, 'bad');
 mod_assert.equal(err1.name, 'MyError');
-mod_assert.deepEqual(err1.info(), {
+mod_assert.deepEqual(VError.info(err1), {
     'errno': 'EDEADLK',
     'anobject': { 'hello': 'world' }
 });
@@ -38,7 +38,7 @@ mod_assert.deepEqual(err1.info(), {
 err2 = new VError(err1, 'worse');
 mod_assert.equal(err2.cause(), err1);
 mod_assert.equal(err2.message, 'worse: bad');
-mod_assert.deepEqual(err2.info(), {
+mod_assert.deepEqual(VError.info(err2), {
     'errno': 'EDEADLK',
     'anobject': { 'hello': 'world' }
 });
@@ -52,7 +52,7 @@ err2 = new VError({
 }, 'worse');
 mod_assert.equal(err2.cause(), err1);
 mod_assert.equal(err2.message, 'worse: bad');
-mod_assert.deepEqual(err2.info(), {
+mod_assert.deepEqual(VError.info(err2), {
     'errno': 'EDEADLK',
     'anobject': { 'hello': 'moon' }
 });
@@ -66,10 +66,10 @@ err3 = new VError({
     }
 }, 'what next');
 mod_assert.equal(err3.name, 'BigError');
-mod_assert.equal(err3.info().remote_ip, '127.0.0.1');
+mod_assert.equal(VError.info(err3).remote_ip, '127.0.0.1');
 mod_assert.equal(err3.cause(), err2);
 mod_assert.equal(err3.message, 'what next: worse: bad');
-mod_assert.equal(err3.info().errno, 'EDEADLK');
-mod_assert.deepEqual(err3.info().anobject, { 'hello': 'moon' });
+mod_assert.equal(VError.info(err3).errno, 'EDEADLK');
+mod_assert.deepEqual(VError.info(err3).anobject, { 'hello': 'moon' });
 
 console.log('test passed');

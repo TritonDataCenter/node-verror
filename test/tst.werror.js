@@ -17,7 +17,7 @@ var nodestack = new Error().stack.split('\n').slice(2).join('\n');
 
 function main()
 {
-	var err, suberr, stack;
+	var err, suberr, stack, stackmessage;
 
 	/*
 	 * Most of the test cases here have analogs in tst.common.js.  In this
@@ -76,8 +76,12 @@ function main()
 	    'caused by Error: root cause');
 	mod_assert.ok(err.cause() === suberr);
 	stack = mod_testcommon.cleanStack(err.stack);
+	/* See the comment in tst.inherit.js. */
+	stackmessage = mod_testcommon.oldNode() ?
+	    'WError: proximate cause: 3 issues; caused by Error: root cause' :
+	    'WError: proximate cause: 3 issues';
 	mod_assert.equal(stack, [
-	    'WError: proximate cause: 3 issues; caused by Error: root cause',
+	    stackmessage,
 	    '    at main (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);
@@ -89,7 +93,7 @@ function main()
 	mod_assert.ok(err.cause() === suberr);
 	stack = mod_testcommon.cleanStack(err.stack);
 	mod_assert.equal(stack, [
-	    'WError: proximate cause: 3 issues; caused by Error: root cause',
+	    stackmessage,
 	    '    at main (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);

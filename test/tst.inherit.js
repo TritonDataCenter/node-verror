@@ -4,6 +4,7 @@
 
 var mod_assert = require('assert');
 var mod_util = require('util');
+var mod_testcommon = require('./common');
 
 var VError = require('../lib/verror');
 var WError = VError.WError;
@@ -46,8 +47,22 @@ mod_assert.equal(err.cause(), suberr);
 mod_assert.equal(err.message, 'top');
 mod_assert.equal(err.toString(),
 	'WErrorChild: top; caused by Error: root cause');
-mod_assert.equal(err.stack.split('\n')[0],
-	'WErrorChild: top; caused by Error: root cause');
+
+/*
+ * On Node 0.10 and earlier, the 'stack' property appears to use the error's
+ * toString() method.  On newer versions, it appears to use the message
+ * property the first time err.stack is accessed (_not_ when it was
+ * constructed).  Since the point of WError is to omit the cause messages from
+ * the WError's message, there's no way to have the err.stack property show the
+ * detailed message in Node 0.12 and later.
+ */
+if (mod_testcommon.oldNode()) {
+	mod_assert.equal(err.stack.split('\n')[0],
+	    'WErrorChild: top; caused by Error: root cause');
+} else {
+	mod_assert.equal(err.stack.split('\n')[0], 'WErrorChild: top');
+
+}
 
 /*
  * Test that "<Ctor>.toString()" uses the constructor name, so that setting
