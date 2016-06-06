@@ -10,6 +10,7 @@ The error classes here support:
 * printf-style arguments for the message
 * chains of causes
 * properties to provide extra information about the error
+* creating your own subclasses that support all of these
 
 The classes here are:
 
@@ -23,11 +24,11 @@ The classes here are:
   for logging and debugging.
 * **SError**, which is just like VError but interprets printf-style arguments
   more strictly.
-* **MultiError**, which is just an Error representing a list of underlying
-  errors.
+* **MultiError**, which is just an Error that encapsulates one or more other
+  errors.  (This is used for parallel operations that return several errors.)
 
 
-# Demo
+# Quick start
 
 If nothing else, you can use VError as a drop-in replacement for the built-in
 JavaScript Error class, with the addition of printf-style messages:
@@ -97,7 +98,109 @@ at each level.
 You can also decorate Error objects with additional information so that callers
 can not only handle each kind of error differently, but also construct their own
 error messages (e.g., to localize them, format them, group them by type, and so
-on).  See the `info` constructor argument below.
+on).  See the example below.
+
+
+# Deeper dive
+
+The two main goals for VError are:
+
+* **Make it easy to construct clear, complete error messages intended for
+  people.**  Clear error messages greatly improve both user experience and
+  debuggability, so we wanted to make it easy to build them.  That's why the
+  constructor takes printf-style arguments.
+* **Make it easy to construct objects with programmatically-accessible
+  metadata** (which we call _informational properties_).  Instead of just saying
+  "connection refused while connecting to 192.168.1.2:80", you can add
+  properties like `"ip": "192.168.1.2"` and `"tcpPort": 80`.  This can be used
+  for feeding into monitoring systems, analyzing large numbers of Errors (as
+  from a log file), or localizing error messages.
+
+To really make this useful, it also needs to be easy to compose Errors:
+higher-level code should be able to augment the Errors reported by lower-level
+code to provide a more complete description of what happened.  Instead of saying
+"connection refused", you can say "operation X failed: connection refused".
+That's why VError supports `causes`.
+
+In order for all this to work, programmers need to know that it's generally safe
+to wrap lower-level Errors with higher-level ones.  If you have existing code
+that handles Errors produced by a library, you should be able to wrap those
+Errors with a VError to add information without breaking the error handling
+code.  There are two obvious ways that this could break such consumers:
+
+* The error's name might change.  People typically use `name` to determine what
+  kind of Error they've got.  To ensure compatibility, you can create VErrors
+  with custom names, but this approach isn't great because it prevents you from
+  representing complex failures.  For this reason, VError provides
+  `findCauseByName`, which essentially asks: does this Error _or any of its
+  causes_ have this specific type?  If error handling code uses
+  `findCauseByName`, then subsystems can construct very specific causal chains
+  for debuggability and still let people handle simple cases easily.  There's an
+  example below.
+* The error's properties might change.  People often hang additional properties
+  off of Error objects.  If we wrap an existing Error in a new Error, those
+  properties would be lost unless we copied them.  But there are a variety of
+  both standard and non-standard Error properties that should _not_ be copied in
+  this way: most obviously `name`, `message`, and `stack`, but also `fileName`,
+  `lineNumber`, and a few others.  Plus, it's useful for some Error subclasses
+  to have their own private properties -- and there'd be no way to know whether
+  these should be copied.  For these reasons, VError first-classes these
+  information properties.  You have to provide them in the constructor, you can
+  only fetch them with the `info()` function, and VError takes care of making
+  sure properties from causes wind up in the `info()` output.
+
+Let's put this all together with an example from the node-fast RPC library.
+node-fast implements a simple RPC protocol for Node programs.  There's a server
+and client interface, and clients make RPC requests to servers.  Let's say the
+server fails with an UnauthorizedError with message "user 'bob' is not
+authorized".  The client wraps all server errors with a FastServerError.  The
+client also wraps all request errors with a FastRequestError that includes the
+name of the RPC call being made.  The result of this failed RPC might look like
+this:
+
+    name: FastRequestError
+    message: "request failed: server error: user 'bob' is not authorized"
+    rpcMsgid: <unique identifier for this request>
+    rpcMethod: GetObject
+    cause:
+        name: FastServerError
+        message: "server error: user 'bob' is not authorized"
+        cause:
+            name: UnauthorizedError
+            message: "user 'bob' is not authorized"
+            rpcUser: "bob"
+
+When the caller uses `VError.info()`, the information properties are collapsed
+so that it looks like this:
+
+    message: "request failed: server error: user 'bob' is not authorized"
+    rpcMsgid: <unique identifier for this request>
+    rpcMethod: GetObject
+    rpcUser: "bob"
+
+Taking this apart:
+
+* The error's message is a complete description of the problem.  The caller can
+  report this directly to its caller, which can potentially make its way back to
+  an end user (if appropriate).  It can also be logged.
+* The caller can tell that the request failed on the server, rather than as a
+  result of a client problem (e.g., failure to serialize the request), a
+  transport problem (e.g., failure to connect to the server), or something else
+  (e.g., a timeout).  They do this using `findCauseByName('FastServerError')`
+  rather than checking the `name` field directly.
+* If the caller logs this error, the logs can be analyzed to aggregate 
+  errors by cause, by RPC method name, by user, or whatever.  Or the
+  error can be correlated with other events for the same rpcMsgid.
+* It wasn't very hard for any part of the code to contribute to this Error.
+  Each part of the stack has just a few lines to provide exactly what it knows,
+  with very little boilerplate.
+
+It's not expected that you'd use these complex forms all the time.  Despite
+supporting the complex case above, you can still just do:
+
+   new VError("my service isn't working");
+
+for the simple cases.
 
 
 # Reference: VError, WError, SError
@@ -326,8 +429,8 @@ Returns an array of the errors used to construct this MultiError.
 
 # Contributing
 
-Contributions welcome.  Code should be "make prepush" clean.  To run "make
-check", you'll need these tools:
+Contributions should be "make prepush" clean.  To run "make check", you'll need
+these tools:
 
 * https://github.com/davepacheco/jsstyle
 * https://github.com/davepacheco/javascriptlint
