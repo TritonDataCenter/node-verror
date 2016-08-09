@@ -4,6 +4,7 @@
 
 var mod_assert = require('assert');
 var mod_util = require('util');
+var mod_testcommon = require('./common');
 
 var VError = require('../lib/verror');
 var WError = VError.WError;
@@ -46,12 +47,27 @@ mod_assert.equal(err.cause(), suberr);
 mod_assert.equal(err.message, 'top');
 mod_assert.equal(err.toString(),
 	'WErrorChild: top; caused by Error: root cause');
-mod_assert.equal(err.stack.split('\n')[0],
-	'WErrorChild: top; caused by Error: root cause');
 
+/*
+ * On Node 0.10 and earlier, the 'stack' property appears to use the error's
+ * toString() method.  On newer versions, it appears to use the message
+ * property the first time err.stack is accessed (_not_ when it was
+ * constructed).  Since the point of WError is to omit the cause messages from
+ * the WError's message, there's no way to have the err.stack property show the
+ * detailed message in Node 0.12 and later.
+ */
+if (mod_testcommon.oldNode()) {
+	mod_assert.equal(err.stack.split('\n')[0],
+	    'WErrorChild: top; caused by Error: root cause');
+} else {
+	mod_assert.equal(err.stack.split('\n')[0], 'WErrorChild: top');
 
-// Test that `<Ctor>.toString()` uses the ctor name. I.e. setting
-// `<Ctor>.prototype.name` isn't necessary.
+}
+
+/*
+ * Test that "<Ctor>.toString()" uses the constructor name, so that setting
+ * "<Ctor>.prototype.name" isn't necessary.
+ */
 function VErrorChildNoName() {
 	VError.apply(this, Array.prototype.slice.call(arguments));
 }
@@ -67,8 +83,10 @@ err = new WErrorChildNoName('top');
 mod_assert.equal(err.toString(), 'WErrorChildNoName: top');
 
 
-// Test that `<Ctor>.prototype.name` can be used for the `.toString()`
-// when the ctor is anonymous.
+/*
+ * Test that `<Ctor>.prototype.name` can be used for the `.toString()`
+ * when the ctor is anonymous.
+ */
 var VErrorChildAnon = function () {
 	VError.apply(this, Array.prototype.slice.call(arguments));
 };
@@ -85,10 +103,9 @@ WErrorChildAnon.prototype.name = 'WErrorChildAnon';
 err = new WErrorChildAnon('top');
 mod_assert.equal(err.toString(), 'WErrorChildAnon: top');
 
-
-// Test get appropriate exception name in `.toString()` when reconstituting
-// an error instance a la:
-//    https://github.com/mcavage/node-fast/blob/master/lib/client.js#L215
+/*
+ * Test that we get an appropriate exception name in toString() output.
+ */
 err = new VError('top');
 err.name = 'CustomNameError';
 mod_assert.equal(err.toString(), 'CustomNameError: top');

@@ -32,5 +32,5 @@ handleRequest('/nonexistent', function (err) {
 		console.log(extsprintf.sprintf('%r', err));
 	}
 
-    /* ... */
+	/* ... */
 });

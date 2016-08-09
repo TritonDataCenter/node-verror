@@ -15,7 +15,7 @@ var verr = new VError(err);
 mod_assert.ok(mod_isError(verr.cause()));
 
 var context = mod_vm.createContext({
-	callback: function callback(err2) {
+	'callback': function callback(err2) {
 		mod_assert.ok(mod_isError(err2));
 		var verr2 = new VError(err);
 		mod_assert.ok(mod_isError(verr2.cause()));

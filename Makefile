@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012, Joyent, Inc. All rights reserved.
+# Copyright (c) 2016, Joyent, Inc. All rights reserved.
 #
 # Makefile: top-level Makefile
 #
@@ -11,12 +11,13 @@
 #
 # Tools
 #
+CATEST		 = deps/catest/catest
 NPM		 = npm
 
 #
 # Files
 #
-JS_FILES	:= $(shell find lib examples tests -name '*.js')
+JS_FILES	:= $(shell find lib examples test -name '*.js')
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSL_CONF_NODE	 = jsl.node.conf
@@ -26,12 +27,9 @@ all:
 	$(NPM) install
 
 .PHONY: test
-test:
-	node tests/tst.inherit.js
-	node tests/tst.verror.js
-	node tests/tst.werror.js
-	node tests/tst.serror.js
-	node tests/tst.context.js
-	@echo all tests passed
+test: $(CATEST)
+	$(CATEST) -a
+
+$(CATEST): deps/catest/.git
 
 include ./Makefile.targ
