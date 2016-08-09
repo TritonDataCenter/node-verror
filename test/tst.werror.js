@@ -12,7 +12,10 @@ var WError = mod_verror.WError;
 /*
  * Save the generic parts of all stack traces so we can avoid hardcoding
  * Node-specific implementation details in our testing of stack traces.
+ * The stack trace limit has to be large enough to capture all of Node's frames,
+ * which are more than the default (10 frames) in Node v6.
  */
+Error.stackTraceLimit = 20;
 var nodestack = new Error().stack.split('\n').slice(2).join('\n');
 
 function main()

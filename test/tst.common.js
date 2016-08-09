@@ -14,7 +14,10 @@ var WError = mod_verror.WError;
 /*
  * Save the generic parts of all stack traces so we can avoid hardcoding
  * Node-specific implementation details in our testing of stack traces.
+ * The stack trace limit has to be large enough to capture all of Node's frames,
+ * which are more than the default (10 frames) in Node v6.
  */
+Error.stackTraceLimit = 20;
 var nodestack = new Error().stack.split('\n').slice(2).join('\n');
 
 /*
@@ -52,6 +55,13 @@ function runTests(cons, label)
 	    '    at runTests (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);
+
+	/* used without "new" */
+	err = cons('test %s', 'foo');
+	mod_assert.equal(err.name, label);
+	mod_assert.ok(err instanceof Error);
+	mod_assert.ok(err instanceof cons);
+	mod_assert.equal(err.message, 'test foo');
 
 	/* options-argument form */
 	err = new cons({});
