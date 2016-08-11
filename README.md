@@ -30,6 +30,10 @@ The classes here are:
 
 # Quick start
 
+First, install the package:
+
+    npm install verror
+
 If nothing else, you can use VError as a drop-in replacement for the built-in
 JavaScript Error class, with the addition of printf-style messages:
 
