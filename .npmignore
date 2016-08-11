@@ -1,0 +1,8 @@
+node_modules
+examples
+test
+.gitmodules
+.npmignore
+jsl.node.conf
+Makefile
+Makefile.targ
