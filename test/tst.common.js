@@ -86,6 +86,23 @@ function runTests(cons, label)
 	mod_assert.equal(err.message, 'my error');
 	mod_assert.ok(err.cause() === undefined);
 
+	/* fullStack */
+	err = new cons('Some error');
+	stack = mod_testcommon.cleanStack(VError.fullStack(err));
+	mod_assert.equal(stack, [
+		stackname + ': Some error',
+		'    at runTests (dummy filename)',
+		'    at Object.<anonymous> (dummy filename)'
+	].join('\n') + '\n' + nodestack);
+
+	err = new Error('Some error');
+	stack = mod_testcommon.cleanStack(VError.fullStack(err));
+	mod_assert.equal(stack, [
+		'Error: Some error',
+		'    at runTests (dummy filename)',
+		'    at Object.<anonymous> (dummy filename)'
+	].join('\n') + '\n' + nodestack);
+
 	/* printf-style message */
 	err = new cons('%s error: %3d problems', 'very bad', 15);
 	mod_assert.equal(err.message, 'very bad error:  15 problems');

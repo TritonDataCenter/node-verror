@@ -314,6 +314,11 @@ list of resolvers used to resolve it.  The values of these properties should
 generally be plain objects (i.e., consisting only of null, undefined, numbers,
 booleans, strings, and objects and arrays containing only other plain objects).
 
+### `VError.fullStack(err)`
+
+Returns a string containing the full stack trace, with all nested errors recursively
+reported as `'caused by:' + err.stack`.
+
 
 ## Examples
 
@@ -387,6 +392,42 @@ This outputs:
         at Function.Module.runMain (module.js:497:10)
         at startup (node.js:119:16)
         at node.js:935:3
+        
+You can also print the complete stack trace of combined `Error`s by using
+`VError.fullStack(err).`
+
+```javascript
+var err1 = new VError('something bad happened');
+/* ... */
+var err2 = new VError(err1, 'something really bad happened here');
+
+console.log(VError.fullStack(err2));
+```
+
+This outputs:
+
+    VError: something really bad happened here: something bad happened
+        at Object.<anonymous> (/home/dap/node-verror/examples/fullStack.js:5:12)
+        at Module._compile (module.js:409:26)
+        at Object.Module._extensions..js (module.js:416:10)
+        at Module.load (module.js:343:32)
+        at Function.Module._load (module.js:300:12)
+        at Function.Module.runMain (module.js:441:10)
+        at startup (node.js:139:18)
+        at node.js:968:3
+    caused by: VError: something bad happened
+        at Object.<anonymous> (/home/dap/node-verror/examples/fullStack.js:3:12)
+        at Module._compile (module.js:409:26)
+        at Object.Module._extensions..js (module.js:416:10)
+        at Module.load (module.js:343:32)
+        at Function.Module._load (module.js:300:12)
+        at Function.Module.runMain (module.js:441:10)
+        at startup (node.js:139:18)
+        at node.js:968:3
+
+`VError.fullStack` is also safe to use on regular `Error`s, so feel free to use
+it whenever you need to extract the stack trace from an `Error`, regardless if
+it's a `VError` or not.
 
 # Reference: MultiError
 
