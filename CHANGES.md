@@ -2,6 +2,10 @@
 
 ## Not yet released
 
+No changes yet.
+
+## v1.8.0
+
 * #23 Preserve original stack trace(s)
 
 ## v1.7.0
