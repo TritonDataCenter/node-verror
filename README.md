@@ -474,11 +474,4 @@ Returns an array of the errors used to construct this MultiError.
 
 # Contributing
 
-Contributions should be "make prepush" clean.  To run "make check", you'll need
-these tools:
-
-* https://github.com/davepacheco/jsstyle
-* https://github.com/davepacheco/javascriptlint
-
-If you're changing something non-trivial or user-facing, you may want to submit
-an issue first.
+See separate [contribution guidelines](CONTRIBUTING.md).
