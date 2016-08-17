@@ -20,7 +20,7 @@ var nodestack = new Error().stack.split('\n').slice(2).join('\n');
 
 function main()
 {
-	var err, suberr, stack, stackmessage;
+	var err, suberr, stack, stackmessageTop, stackmessageMid;
 
 	/*
 	 * Most of the test cases here have analogs in tst.common.js.  In this
@@ -80,11 +80,11 @@ function main()
 	mod_assert.ok(err.cause() === suberr);
 	stack = mod_testcommon.cleanStack(err.stack);
 	/* See the comment in tst.inherit.js. */
-	stackmessage = mod_testcommon.oldNode() ?
+	stackmessageTop = mod_testcommon.oldNode() ?
 	    'WError: proximate cause: 3 issues; caused by Error: root cause' :
 	    'WError: proximate cause: 3 issues';
 	mod_assert.equal(stack, [
-	    stackmessage,
+	    stackmessageTop,
 	    '    at main (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);
@@ -96,7 +96,7 @@ function main()
 	mod_assert.ok(err.cause() === suberr);
 	stack = mod_testcommon.cleanStack(err.stack);
 	mod_assert.equal(stack, [
-	    stackmessage,
+	    stackmessageTop,
 	    '    at main (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);
@@ -127,12 +127,19 @@ function main()
 	suberr = new WError(new Error('root cause'), 'mid');
 	err = new WError(suberr, 'top');
 	stack = mod_testcommon.cleanStack(VError.fullStack(err));
+	/* See the comment in tst.inherit.js. */
+	stackmessageMid = mod_testcommon.oldNode() ?
+	    'WError: mid; caused by Error: root cause' :
+	    'WError: mid';
+	stackmessageTop = mod_testcommon.oldNode() ?
+	    'WError: top; caused by ' + stackmessageMid :
+	    'WError: top';
 	mod_assert.equal(stack, [
-		'WError: top',
+		stackmessageTop,
 		'    at main (dummy filename)',
 		'    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack + '\n' + [
-		'caused by: WError: mid',
+		'caused by: ' + stackmessageMid,
 		'    at main (dummy filename)',
 		'    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack + '\n' + [

@@ -8,7 +8,7 @@ var mod_testcommon = require('./common');
 
 var VError = require('../lib/verror');
 var WError = VError.WError;
-var err, suberr;
+var err, suberr, stack, nodestack;
 
 function VErrorChild()
 {
@@ -27,6 +27,14 @@ function WErrorChild()
 mod_util.inherits(WErrorChild, WError);
 WErrorChild.prototype.name = 'WErrorChild';
 
+/*
+ * Save the generic parts of all stack traces so we can avoid hardcoding
+ * Node-specific implementation details in our testing of stack traces.
+ * The stack trace limit has to be large enough to capture all of Node's frames,
+ * which are more than the default (10 frames) in Node v6.x.
+ */
+Error.stackTraceLimit = 20;
+nodestack = new Error().stack.split('\n').slice(2).join('\n');
 
 suberr = new Error('root cause');
 err = new VErrorChild(suberr, 'top');
@@ -36,7 +44,12 @@ mod_assert.ok(err instanceof VErrorChild);
 mod_assert.equal(err.cause(), suberr);
 mod_assert.equal(err.message, 'top: root cause');
 mod_assert.equal(err.toString(), 'VErrorChild: top: root cause');
-mod_assert.equal(err.stack.split('\n')[0], 'VErrorChild: top: root cause');
+stack = mod_testcommon.cleanStack(err.stack);
+mod_assert.equal(stack, [
+    'VErrorChild: top: root cause',
+    '    at Object.<anonymous> (dummy filename)',
+    nodestack
+].join('\n'));
 
 suberr = new Error('root cause');
 err = new WErrorChild(suberr, 'top');
@@ -47,6 +60,7 @@ mod_assert.equal(err.cause(), suberr);
 mod_assert.equal(err.message, 'top');
 mod_assert.equal(err.toString(),
 	'WErrorChild: top; caused by Error: root cause');
+stack = mod_testcommon.cleanStack(err.stack);
 
 /*
  * On Node 0.10 and earlier, the 'stack' property appears to use the error's
@@ -57,11 +71,17 @@ mod_assert.equal(err.toString(),
  * detailed message in Node 0.12 and later.
  */
 if (mod_testcommon.oldNode()) {
-	mod_assert.equal(err.stack.split('\n')[0],
-	    'WErrorChild: top; caused by Error: root cause');
+	mod_assert.equal(stack, [
+	    'WErrorChild: top; caused by Error: root cause',
+	    '    at Object.<anonymous> (dummy filename)',
+	    nodestack
+	].join('\n'));
 } else {
-	mod_assert.equal(err.stack.split('\n')[0], 'WErrorChild: top');
-
+	mod_assert.equal(stack, [
+	    'WErrorChild: top',
+	    '    at Object.<anonymous> (dummy filename)',
+	    nodestack
+	].join('\n'));
 }
 
 /*

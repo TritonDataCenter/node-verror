@@ -2,7 +2,11 @@
 
 ## Not yet released
 
-No changes yet.
+None yet.
+
+## v1.8.1
+
+* #39 captureStackTrace lost when inheriting from WError
 
 ## v1.8.0
 
