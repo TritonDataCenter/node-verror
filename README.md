@@ -192,7 +192,7 @@ Taking this apart:
   transport problem (e.g., failure to connect to the server), or something else
   (e.g., a timeout).  They do this using `findCauseByName('FastServerError')`
   rather than checking the `name` field directly.
-* If the caller logs this error, the logs can be analyzed to aggregate 
+* If the caller logs this error, the logs can be analyzed to aggregate
   errors by cause, by RPC method name, by user, or whatever.  Or the
   error can be correlated with other events for the same rpcMsgid.
 * It wasn't very hard for any part of the code to contribute to this Error.
@@ -319,6 +319,15 @@ booleans, strings, and objects and arrays containing only other plain objects).
 Returns a string containing the full stack trace, with all nested errors recursively
 reported as `'caused by:' + err.stack`.
 
+### `VError.findCauseByName(err, name)`
+
+The `findCauseByName()` function traverses the cause chain for `err`, looking
+for an error whose `name` property matches the passed in `name` value. If no
+match is found, `null` is returned.
+
+If a vanilla error or a non-VError error is passed in, then there is no cause
+chain to traverse. In this scenario, the function will check the `name`
+property of only `err`.
 
 ## Examples
 
@@ -392,7 +401,7 @@ This outputs:
         at Function.Module.runMain (module.js:497:10)
         at startup (node.js:119:16)
         at node.js:935:3
-        
+
 You can also print the complete stack trace of combined `Error`s by using
 `VError.fullStack(err).`
 
