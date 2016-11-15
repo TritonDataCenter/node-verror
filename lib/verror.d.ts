@@ -8,6 +8,13 @@ declare interface VErrorOptions {
 
 type VErrorInfo = { [key: string]: any };
 
+declare class SError extends VError { }
+declare class WError extends VError { }
+declare class MultiError extends VError {
+    constructor(errors: Error[]);
+    public errors(): Error[];
+}
+
 declare class VError extends Error {
     static VError: typeof VError;
     static SError: typeof SError;
@@ -19,21 +26,10 @@ declare class VError extends Error {
     static findCauseByName(err: Error, name: string): Error | null;
     static fullStack(err: Error): string;
 
+    public cause(): Error | undefined;
     public constructor(options: VErrorOptions, format: string, ...args: any[]);
     public constructor(cause: Error, format: string, ...args: any[]);
     public constructor(format: string, ...args: any[]);
-
-    public cause(): Error | undefined;
-    public name: string;
-
-    public toString(): string;
-}
-
-declare class SError extends VError { }
-declare class WError extends VError { }
-declare class MultiError extends VError {
-    constructor(errors: Error[]);
-    public errors(): Error[];
 }
 
 export = VError;

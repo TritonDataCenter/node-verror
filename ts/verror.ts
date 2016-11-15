@@ -6,8 +6,8 @@ const verrorOts = new VError({
     strict: false
 }, "", "");
 
-new VError.SError(new Error(), "test");
-new VError.WError(new Error(), "test");
+new VError.SError(new Error(), "test").name;
+new VError.WError(new Error(), "test").toString();
 new VError.MultiError([new Error()]);
 
 VError.cause(verror);
