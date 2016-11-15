@@ -19,5 +19,6 @@
 		"test": "make test",
 		"tstest": "tsc -p ./ts"
 	},
+	"types": "lib/verror.d.ts",
 	"license": "MIT"
 }
