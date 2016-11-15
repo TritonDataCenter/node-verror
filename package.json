@@ -16,7 +16,8 @@
 		"node >=0.6.0"
 	],
 	"scripts": {
-		"test": "make test"
+		"test": "make test",
+		"tstest": "tsc -p ./ts"
 	},
 	"license": "MIT"
 }
