@@ -4,6 +4,10 @@
 
 None yet.
 
+## v1.9.0
+
+* #47 could use VError.hasCauseWithName()
+
 ## v1.8.1
 
 * #39 captureStackTrace lost when inheriting from WError

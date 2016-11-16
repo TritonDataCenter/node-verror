@@ -325,9 +325,19 @@ The `findCauseByName()` function traverses the cause chain for `err`, looking
 for an error whose `name` property matches the passed in `name` value. If no
 match is found, `null` is returned.
 
+If all you want is to know _whether_ there's a cause (and you don't care what it
+is), you can use `VError.hasCauseWithName(err, name)`.
+
 If a vanilla error or a non-VError error is passed in, then there is no cause
 chain to traverse. In this scenario, the function will check the `name`
 property of only `err`.
+
+### `VError.hasCauseWithName(err, name)`
+
+Returns true if and only if `VError.findCauseByName(err, name)` would return
+a non-null value.  This essentially determines whether `err` has any cause in
+its cause chain that has name `name`.
+
 
 ## Examples
 
