@@ -4,6 +4,10 @@
 
 None yet.
 
+## v1.10.0
+
+* #49 want convenience functions for MultiErrors
+
 ## v1.9.0
 
 * #47 could use VError.hasCauseWithName()

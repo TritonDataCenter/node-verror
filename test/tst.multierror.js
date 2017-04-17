@@ -7,6 +7,8 @@ var mod_verror = require('../lib/verror');
 var mod_testcommon = require('./common');
 
 var MultiError = mod_verror.MultiError;
+var errorFromList = mod_verror.errorFromList;
+var errorForEach = mod_verror.errorForEach;
 
 /*
  * Save the generic parts of all stack traces so we can avoid hardcoding
@@ -20,6 +22,7 @@ var nodestack = new Error().stack.split('\n').slice(2).join('\n');
 function main()
 {
 	var err1, err2, err3, merr, stack;
+	var accum, doAccum;
 
 	mod_assert.throws(function () {
 		console.error(new MultiError());
@@ -52,6 +55,78 @@ function main()
 	    '    at main (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);
+
+
+	/* errorFromList */
+	mod_assert.throws(function () {
+		console.error(errorFromList());
+	}, /^AssertionError: errors \(\[object\]\) is required$/);
+
+	mod_assert.throws(function () {
+		console.error(errorFromList(null));
+	}, /^AssertionError: errors \(\[object\]\) is required$/);
+
+	mod_assert.throws(function () {
+		console.error(errorFromList({}));
+	}, /^AssertionError: errors \(\[object\]\) is required$/);
+
+	mod_assert.throws(function () {
+		console.error(errorFromList('asdf'));
+	}, /^AssertionError: errors \(\[object\]\) is required$/);
+
+	mod_assert.throws(function () {
+		console.error(errorFromList([ new Error(), 17 ]));
+	}, /^AssertionError: errors \(\[object\]\) is required$/);
+
+	mod_assert.throws(function () {
+		console.error(errorFromList([ new Error(), {} ]));
+	}, /^AssertionError/);
+
+	mod_assert.strictEqual(null, errorFromList([]));
+	mod_assert.ok(err1 == errorFromList([ err1 ]));
+	mod_assert.ok(err2 == errorFromList([ err2 ]));
+	merr = errorFromList([ err1, err2, err3 ]);
+	mod_assert.ok(merr instanceof MultiError);
+	mod_assert.ok(merr.errors()[0] == err1);
+	mod_assert.ok(merr.errors()[1] == err2);
+	mod_assert.ok(merr.errors()[2] == err3);
+
+
+	/* errorForEach */
+	mod_assert.throws(function () {
+		console.error(errorForEach());
+	}, /^AssertionError: err must be an Error$/);
+
+	mod_assert.throws(function () {
+		console.error(errorForEach(null));
+	}, /^AssertionError: err must be an Error$/);
+
+	mod_assert.throws(function () {
+		console.error(errorForEach(err1));
+	}, /^AssertionError: func \(func\) is required$/);
+
+	mod_assert.throws(function () {
+		console.error(errorForEach(err1, {}));
+	}, /^AssertionError: func \(func\) is required$/);
+
+	mod_assert.throws(function () {
+		console.error(errorForEach({}, function () {}));
+	}, /^AssertionError: err must be an Error$/);
+
+	accum = [];
+	doAccum = function (e) { accum.push(e); };
+
+	accum = [];
+	errorForEach(err1, doAccum);
+	mod_assert.equal(accum.length, 1);
+	mod_assert.ok(accum[0] == err1);
+
+	accum = [];
+	errorForEach(merr, doAccum);
+	mod_assert.equal(accum.length, 3);
+	mod_assert.ok(accum[0] == err1);
+	mod_assert.ok(accum[1] == err2);
+	mod_assert.ok(accum[2] == err3);
 }
 
 main();

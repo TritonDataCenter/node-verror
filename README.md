@@ -338,6 +338,35 @@ Returns true if and only if `VError.findCauseByName(err, name)` would return
 a non-null value.  This essentially determines whether `err` has any cause in
 its cause chain that has name `name`.
 
+### `VError.errorFromList(errors)`
+
+Given an array of Error objects (possibly empty), return a single error
+representing the whole collection of errors.  If the list has:
+
+* 0 elements, returns `null`
+* 1 element, returns the sole error
+* more than 1 element, returns a MultiError referencing the whole list
+
+This is useful for cases where an operation may produce any number of errors,
+and you ultimately want to implement the usual `callback(err)` pattern.  You can
+accumulate the errors in an array and then invoke
+`callback(VError.errorFromList(errors))` when the operation is complete.
+
+
+### `VError.errorForEach(err, func)`
+
+Convenience function for iterating an error that may itself be a MultiError.
+
+In all cases, `err` must be an Error.  If `err` is a MultiError, then `func` is
+invoked as `func(errorN)` for each of the underlying errors of the MultiError.
+If `err` is any other kind of error, `func` is invoked once as `func(err)`.  In
+all cases, `func` is invoked synchronously.
+
+This is useful for cases where an operation may produce any number of warnings
+that may be encapsulated with a MultiError -- but may not be.
+
+This function does not iterate an error's cause chain.
+
 
 ## Examples
 
@@ -482,6 +511,9 @@ console.error(err.message);
 outputs:
 
     first of 2 errors: failed to resolve DNS name "abc.example.com"
+
+See the convenience function `VError.errorFromList`, which is sometimes simpler
+to use than this constructor.
 
 ## Public methods
 
