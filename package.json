@@ -3,6 +3,7 @@
 	"version": "1.10.0",
 	"description": "richer JavaScript errors",
 	"main": "./lib/verror.js",
+	"files": ["./lib/verror.js"],
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/davepacheco/node-verror.git"
