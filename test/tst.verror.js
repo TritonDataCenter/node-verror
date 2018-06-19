@@ -47,6 +47,20 @@ function main()
 		console.error(new SError('my %s string', undefined));
 	}, /attempted to print undefined or null as a string/);
 
+	/* disabling printf */
+	err = new VError({ 'skipPrintf': true }, '%s');
+	mod_assert.equal(err.message, '%s');
+	err = new VError({ 'skipPrintf': true });
+	mod_assert.equal(err.message, '');
+	err = new VError({ 'skipPrintf': true }, '%s', 'foo');
+	mod_assert.equal(err.message, '%s');
+	err = new VError({ 'skipPrintf': false }, '%s', 'foo');
+	mod_assert.equal(err.message, 'foo');
+	err = new VError({ 'skipPrintf': null }, '%s', 'foo');
+	mod_assert.equal(err.message, 'foo');
+	err = new VError({ 'skipPrintf': undefined }, '%s', 'foo');
+	mod_assert.equal(err.message, 'foo');
+
 	/* caused by another error, with no additional message */
 	suberr = new Error('root cause');
 	err = new VError(suberr);
