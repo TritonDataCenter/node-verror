@@ -60,19 +60,19 @@ function main()
 	/* errorFromList */
 	mod_assert.throws(function () {
 		console.error(errorFromList());
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError: list of errors \(array\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList(null));
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError: list of errors \(array\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList({}));
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError: list of errors \(array\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList('asdf'));
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError: list of errors \(array\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList([ new Error(), 17 ]));
