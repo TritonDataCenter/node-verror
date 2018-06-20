@@ -8,12 +8,12 @@
 		"url": "git://github.com/davepacheco/node-verror.git"
 	},
 	"dependencies": {
-		"assert-plus": "^1.0.0",
-		"core-util-is": "1.0.2",
-		"extsprintf": "^1.2.0"
+		"assertion-error": "^1.1.0",
+		"extsprintf": "^1.2.0",
+		"inherits": "^2.0.3"
 	},
 	"engines": [
-		"node >=0.6.0"
+		"node >=4.8.4"
 	],
 	"scripts": {
 		"test": "make test"
