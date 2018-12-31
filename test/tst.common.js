@@ -7,6 +7,7 @@ var mod_assert = require('assert');
 var mod_verror = require('../lib/verror');
 var mod_testcommon = require('./common');
 
+var PError = mod_verror.PError;
 var SError = mod_verror.SError;
 var VError = mod_verror.VError;
 var WError = mod_verror.WError;
@@ -177,8 +178,24 @@ function runTests(cons, label)
 	    '    at runTests (dummy filename)',
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);
+
+	/* disabling printf */
+	err = new cons({ 'skipPrintf': true }, '%s');
+	mod_assert.equal(err.message, '%s');
+	err = new cons({ 'skipPrintf': true });
+	mod_assert.equal(err.message, '');
+	mod_assert.throws(function () {
+		console.error(new cons({ 'skipPrintf': true }, '%s', 'foo'));
+	}, /only one argument is allowed with options.skipPrintf/);
+	err = new cons({ 'skipPrintf': false }, '%s', 'foo');
+	mod_assert.equal(err.message, 'foo');
+	err = new cons({ 'skipPrintf': null }, '%s', 'foo');
+	mod_assert.equal(err.message, 'foo');
+	err = new cons({ 'skipPrintf': undefined }, '%s', 'foo');
+	mod_assert.equal(err.message, 'foo');
 }
 
 runTests(VError, 'VError');
 runTests(WError, 'WError');
 runTests(SError, 'VError');
+runTests(PError, 'PError');

@@ -22,6 +22,8 @@ The classes here are:
   top-level error.  This is useful for API endpoints where you don't want to
   expose internal error messages, but you still want to preserve the error chain
   for logging and debugging.
+* **PError**, which is just like VError but does not interpret printf-style
+  arguments at all.
 * **SError**, which is just like VError but interprets printf-style arguments
   more strictly.
 * **MultiError**, which is just an Error that encapsulates one or more other
@@ -207,11 +209,11 @@ supporting the complex case above, you can still just do:
 for the simple cases.
 
 
-# Reference: VError, WError, SError
+# Reference: VError, WError, PError, SError
 
-VError, WError, and SError are convenient drop-in replacements for `Error` that
-support printf-style arguments, first-class causes, informational properties,
-and other useful features.
+VError, WError, PError, and SError are convenient drop-in replacements for
+`Error` that support printf-style arguments, first-class causes, informational
+properties, and other useful features.
 
 
 ## Constructors
@@ -249,6 +251,7 @@ Option name      | Type             | Meaning
 `strict`         | boolean          | If true, then `null` and `undefined` values in `sprintf_args` are passed through to `sprintf()`.  Otherwise, these are replaced with the strings `'null'`, and '`undefined`', respectively.
 `constructorOpt` | function         | If specified, then the stack trace for this error ends at function `constructorOpt`.  Functions called by `constructorOpt` will not show up in the stack.  This is useful when this class is subclassed.
 `info`           | object           | Specifies arbitrary informational properties that are available through the `VError.info(err)` static class method.  See that method for details.
+`skipPrintf`     | boolean          | If true, then `sprintf()` is not called on the `sprintf_args` arguments.  Instead, the first argument is taken as a plain string to be used as this error's message.
 
 The second form is equivalent to using the first form with the specified `cause`
 as the error's cause.  This form is distinguished from the first form because
@@ -261,13 +264,15 @@ argument is not an object or an Error.
 The `WError` constructor is used exactly the same way as the `VError`
 constructor.  The `SError` constructor is also used the same way as the
 `VError` constructor except that in all cases, the `strict` property is
-overriden to `true.
+overridden to `true`.  Likewise, the `PError` constructor is used the same way
+as the `VError` constructor except that in all cases, the `skipPrintf`
+property is overridden to `true`.
 
 
 ## Public properties
 
-`VError`, `WError`, and `SError` all provide the same public properties as
-JavaScript's built-in Error objects.
+`VError`, `WError`, `PError`, and `SError` all provide the same public
+properties as JavaScript's built-in Error objects.
 
 Property name | Type   | Meaning
 ------------- | ------ | -------
@@ -275,11 +280,11 @@ Property name | Type   | Meaning
 `message`     | string | Human-readable summary of the failure.  Programmatically-accessible details are provided through `VError.info(err)` class method.
 `stack`       | string | Human-readable stack trace where the Error was constructed.
 
-For all of these classes, the printf-style arguments passed to the constructor
-are processed with `sprintf()` to form a message.  For `WError`, this becomes
-the complete `message` property.  For `SError` and `VError`, this message is
-prepended to the message of the cause, if any (with a suitable separator), and
-the result becomes the `message` property.
+For all of these classes except `PError`, the printf-style arguments passed to
+the constructor are processed with `sprintf()` to form a message.
+For `WError`, this becomes the complete `message` property.  For `SError` and
+`VError`, this message is prepended to the message of the cause, if any
+(with a suitable separator), and the result becomes the `message` property.
 
 The `stack` property is managed entirely by the underlying JavaScript
 implementation.  It's generally implemented using a getter function because
