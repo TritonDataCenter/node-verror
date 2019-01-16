@@ -2,7 +2,7 @@
 
 ## Not yet released
 
-None yet.
+* #65 tst.multierror.js failure on Node v8 and later
 
 ## v1.10.0
 

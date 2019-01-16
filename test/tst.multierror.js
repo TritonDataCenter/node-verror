@@ -60,23 +60,23 @@ function main()
 	/* errorFromList */
 	mod_assert.throws(function () {
 		console.error(errorFromList());
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError.*: errors \(\[object\]\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList(null));
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError.*: errors \(\[object\]\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList({}));
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError.*: errors \(\[object\]\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList('asdf'));
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError.*: errors \(\[object\]\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList([ new Error(), 17 ]));
-	}, /^AssertionError: errors \(\[object\]\) is required$/);
+	}, /^AssertionError.*: errors \(\[object\]\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorFromList([ new Error(), {} ]));
@@ -95,23 +95,23 @@ function main()
 	/* errorForEach */
 	mod_assert.throws(function () {
 		console.error(errorForEach());
-	}, /^AssertionError: err must be an Error$/);
+	}, /^AssertionError.*: err must be an Error$/);
 
 	mod_assert.throws(function () {
 		console.error(errorForEach(null));
-	}, /^AssertionError: err must be an Error$/);
+	}, /^AssertionError.*: err must be an Error$/);
 
 	mod_assert.throws(function () {
 		console.error(errorForEach(err1));
-	}, /^AssertionError: func \(func\) is required$/);
+	}, /^AssertionError.*: func \(func\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorForEach(err1, {}));
-	}, /^AssertionError: func \(func\) is required$/);
+	}, /^AssertionError.*: func \(func\) is required$/);
 
 	mod_assert.throws(function () {
 		console.error(errorForEach({}, function () {}));
-	}, /^AssertionError: err must be an Error$/);
+	}, /^AssertionError.*: err must be an Error$/);
 
 	accum = [];
 	doAccum = function (e) { accum.push(e); };
