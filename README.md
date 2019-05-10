@@ -481,7 +481,7 @@ it's a `VError` or not.
 
 MultiError is an Error class that represents a group of Errors.  This is used
 when you logically need to provide a single Error, but you want to preserve
-information about multiple underying Errors.  A common case is when you execute
+information about multiple underlying Errors.  A common case is when you execute
 several operations in parallel and some of them fail.
 
 MultiErrors are constructed as:
