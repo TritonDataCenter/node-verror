@@ -212,8 +212,9 @@ for the simple cases.
 # Reference: VError, WError, PError, SError
 
 VError, WError, PError, and SError are convenient drop-in replacements for
-`Error` that support printf-style arguments, first-class causes, informational
-properties, and other useful features.
+`Error` that support printf-style arguments (except `PError` whose purpose is
+to skip printf), first-class causes, informational properties, and other useful
+features.
 
 
 ## Constructors
