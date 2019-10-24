@@ -58,7 +58,7 @@ function runTests(cons, label)
 	].join('\n') + '\n' + nodestack);
 
 	/* used without "new" */
-	err = cons('test %s', 'foo');
+	err = cons('test foo');
 	mod_assert.equal(err.name, label);
 	mod_assert.ok(err instanceof Error);
 	mod_assert.ok(err instanceof cons);
@@ -105,13 +105,15 @@ function runTests(cons, label)
 	].join('\n') + '\n' + nodestack);
 
 	/* printf-style message */
-	err = new cons('%s error: %3d problems', 'very bad', 15);
-	mod_assert.equal(err.message, 'very bad error:  15 problems');
-	mod_assert.ok(err.cause() === undefined);
+	if (label !== 'PError') {
+		err = new cons('%s error: %3d problems', 'very bad', 15);
+		mod_assert.equal(err.message, 'very bad error:  15 problems');
+		mod_assert.ok(err.cause() === undefined);
 
-	err = new cons({}, '%s error: %3d problems', 'very bad', 15);
-	mod_assert.equal(err.message, 'very bad error:  15 problems');
-	mod_assert.ok(err.cause() === undefined);
+		err = new cons({}, '%s error: %3d problems', 'very bad', 15);
+		mod_assert.equal(err.message, 'very bad error:  15 problems');
+		mod_assert.ok(err.cause() === undefined);
+	}
 
 	/* null cause (for backwards compatibility with older versions) */
 	err = new cons(null, 'my error');
@@ -159,13 +161,6 @@ function runTests(cons, label)
 	    '    at Object.<anonymous> (dummy filename)'
 	].join('\n') + '\n' + nodestack);
 
-	/* invoked without "new" */
-	err = cons('my %s string', 'testing!');
-	mod_assert.equal(err.name, label);
-	mod_assert.ok(err instanceof cons);
-	mod_assert.ok(err instanceof Error);
-	mod_assert.equal(err.message, 'my testing! string');
-
 	/* custom "name" */
 	err = new cons({ 'name': 'SomeOtherError' }, 'another kind of error');
 	mod_assert.equal(err.name, 'SomeOtherError');
@@ -187,12 +182,14 @@ function runTests(cons, label)
 	mod_assert.throws(function () {
 		console.error(new cons({ 'skipPrintf': true }, '%s', 'foo'));
 	}, /only one argument is allowed with options.skipPrintf/);
-	err = new cons({ 'skipPrintf': false }, '%s', 'foo');
-	mod_assert.equal(err.message, 'foo');
-	err = new cons({ 'skipPrintf': null }, '%s', 'foo');
-	mod_assert.equal(err.message, 'foo');
-	err = new cons({ 'skipPrintf': undefined }, '%s', 'foo');
-	mod_assert.equal(err.message, 'foo');
+	if (label !== 'PError') {
+		err = new cons({ 'skipPrintf': false }, '%s', 'foo');
+		mod_assert.equal(err.message, 'foo');
+		err = new cons({ 'skipPrintf': null }, '%s', 'foo');
+		mod_assert.equal(err.message, 'foo');
+		err = new cons({ 'skipPrintf': undefined }, '%s', 'foo');
+		mod_assert.equal(err.message, 'foo');
+	}
 }
 
 runTests(VError, 'VError');
