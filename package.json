@@ -18,5 +18,13 @@
 	"scripts": {
 		"test": "make test"
 	},
-	"license": "MIT"
+	"license": "MIT",
+	"keywords": [
+		"error",
+		"errors",
+		"err",
+		"exception",
+		"exceptions",
+		"custom"
+	]
 }
