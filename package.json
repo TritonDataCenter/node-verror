@@ -12,9 +12,9 @@
 		"core-util-is": "1.0.2",
 		"extsprintf": "^1.2.0"
 	},
-	"engines": [
-		"node >=0.6.0"
-	],
+	"engines": {
+		"node": ">=0.6.0"
+	},
 	"scripts": {
 		"test": "make test"
 	},
