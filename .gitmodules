@@ -1,3 +1,9 @@
 [submodule "deps/catest"]
 	path = deps/catest
 	url = https://github.com/joyent/catest.git
+[submodule "deps/javascriptlint"]
+	path = deps/javascriptlint
+	url = https://github.com/TritonDataCenter/javascriptlint.git
+[submodule "deps/jsstyle"]
+	path = deps/jsstyle
+	url = https://github.com/TritonDataCenter/jsstyle.git

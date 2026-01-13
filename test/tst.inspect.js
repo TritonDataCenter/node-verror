@@ -30,18 +30,9 @@ var VError = mod_verror.VError;
 var WError = mod_verror.WError;
 var MultiError = mod_verror.MultiError;
 
-/*
- * Check if we're running on Node.js 24 or greater.
- */
-function getNodeMajorVersion()
-{
-	var match = process.versions.node.match(/^(\d+)\./);
-	return (match ? parseInt(match[1], 10) : 0);
-}
-
 function main()
 {
-	var majorVersion = getNodeMajorVersion();
+	var majorVersion = parseInt(process.versions.node.split('.')[0], 10);
 
 	if (majorVersion < 24) {
 		console.error('skipping inspect tests (Node.js %s < 24)',
@@ -49,7 +40,8 @@ function main()
 		return;
 	}
 
-	console.error('running inspect tests (Node.js %s)', process.versions.node);
+	console.error('running inspect tests (Node.js %s)',
+	    process.versions.node);
 
 	testVErrorInspect();
 	testWErrorInspect();
@@ -75,7 +67,7 @@ function testVErrorInspect()
 	 * TypeError: Cannot read properties of undefined (reading 'value')
 	 */
 	var result = mod_util.inspect(err);
-	mod_assert.ok(typeof result === 'string',
+	mod_assert.ok(typeof (result) === 'string',
 	    'util.inspect should return a string');
 	mod_assert.ok(result.indexOf('VError') !== -1,
 	    'inspect output should contain "VError"');
@@ -96,7 +88,7 @@ function testWErrorInspect()
 	var err = new WError(rootError, 'wrapped error');
 
 	var result = mod_util.inspect(err);
-	mod_assert.ok(typeof result === 'string',
+	mod_assert.ok(typeof (result) === 'string',
 	    'util.inspect should return a string');
 	mod_assert.ok(result.indexOf('WError') !== -1,
 	    'inspect output should contain "WError"');
@@ -114,7 +106,7 @@ function testMultiErrorInspect()
 	var err = new MultiError([err1, err2]);
 
 	var result = mod_util.inspect(err);
-	mod_assert.ok(typeof result === 'string',
+	mod_assert.ok(typeof (result) === 'string',
 	    'util.inspect should return a string');
 	mod_assert.ok(result.indexOf('MultiError') !== -1,
 	    'inspect output should contain "MultiError"');
@@ -133,7 +125,7 @@ function testNestedVErrorInspect()
 	var level4 = new VError(level3, 'level 4');
 
 	var result = mod_util.inspect(level4);
-	mod_assert.ok(typeof result === 'string',
+	mod_assert.ok(typeof (result) === 'string',
 	    'util.inspect should return a string');
 
 	console.error('  - nested VError inspect: ok');
@@ -154,7 +146,7 @@ function testVErrorWithInfoInspect()
 	}, 'operation failed');
 
 	var result = mod_util.inspect(err);
-	mod_assert.ok(typeof result === 'string',
+	mod_assert.ok(typeof (result) === 'string',
 	    'util.inspect should return a string');
 	mod_assert.ok(result.indexOf('jse_info') !== -1,
 	    'inspect output should contain jse_info');

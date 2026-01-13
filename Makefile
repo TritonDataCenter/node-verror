@@ -21,7 +21,7 @@ JS_FILES	:= $(shell find lib examples test -name '*.js')
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSL_CONF_NODE	 = jsl.node.conf
-
+JSSTYLE          = deps/jsstyle/jsstyle
 .PHONY: all
 all:
 	$(NPM) install
